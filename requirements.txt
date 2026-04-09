@@ -10,3 +10,5 @@ python-dotenv==1.0.0
 Flask-WTF==1.2.1
 requests==2.31.0
 pytest==8.0.0
+webauthn==2.1.0
+pycryptodome==3.19.0

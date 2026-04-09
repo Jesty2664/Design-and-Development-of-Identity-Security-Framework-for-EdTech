@@ -1,28 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="text-center mb-6">
-    <h2 class="text-3xl font-extrabold text-gray-900">Your Backup Codes</h2>
-    <p class="mt-2 text-sm text-gray-600">These will only be shown once. Please save them in a secure place.</p>
-</div>
-
-<div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-    <p class="text-sm text-yellow-700 font-bold">
-        Warning: If you lose your Authenticator device and fail to save these codes, you will be permanently locked out unless an Admin intervenes.
-    </p>
-</div>
-
-<div class="grid grid-cols-2 gap-4 mb-8">
-    {% for code in codes %}
-        <div class="bg-gray-100 py-3 px-4 rounded text-center border border-gray-300 font-mono text-lg tracking-widest text-gray-800 shadow-inner">
-            {{ code }}
+<div class="max-w-2xl mx-auto px-6 py-20 relative text-center">
+    
+    <div class="mb-10">
+        <div class="w-16 h-16 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 flex items-center justify-center rounded-full mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
-    {% endfor %}
-</div>
+        <h1 class="text-4xl font-academic font-bold text-white uppercase tracking-tighter mb-2">BACKUP_RECOVERY_HASHES</h1>
+        <p class="text-[10px] font-tactical text-yellow-500/80 uppercase tracking-widest">Emergency Assets // Hash Fragments Loaded</p>
+    </div>
 
-<form action="{{ url_for('profile.dashboard') }}" method="GET">
-    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-        I have securely saved these codes
-    </button>
-</form>
+    <div class="frost-panel border-yellow-500/20 shadow-[0_0_30px_rgba(245,158,11,0.1)] p-10">
+        
+        <div class="bg-yellow-500/5 border-l-4 border-yellow-500 px-6 py-4 mb-10 text-[10px] font-academic text-yellow-500 uppercase tracking-widest leading-relaxed text-left">
+            CRITICAL: Store these fragments in a physical enclave. Each hash is single-use and will be purged from the active mesh once consumed. Do not store digitally on unauthorized hardware.
+        </div>
+
+        <!-- Codes Grid -->
+        <div class="grid grid-cols-2 gap-4 mb-12">
+            {% for code in backup_codes %}
+            <div class="p-3 bg-black/40 border border-white/5 font-tactical text-sm text-solar group hover:border-solar transition-colors select-all cursor-copy">
+                <span class="opacity-30 mr-2 text-white">#{{ "{:02d}".format(loop.index) }}</span> {{ code }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+            <button onclick="window.print()" class="btn-solar py-4 px-8 text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                <span>EXPORT_TO_ANALOG</span>
+            </button>
+            <a href="{{ url_for('profile.dashboard') }}" class="py-4 px-8 border border-white/10 text-white font-tactical text-[11px] hover:bg-white/5 transition-colors uppercase tracking-widest flex items-center justify-center border-white/20">
+                Return_to_Control
+            </a>
+        </div>
+    </div>
+
+    <!-- Decorative Decor -->
+    <div class="mt-12 text-[9px] font-tactical text-gray-600 uppercase tracking-[0.4em] opacity-40">
+        SECURITY_LEVEL_4 // ACCESS_RESTRICTED
+    </div>
+
+</div>
 {% endblock %}

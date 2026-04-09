@@ -3,344 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EdTech Identity Security | Aether-Chasm</title>
+    <title>{% block title %}Identity Security | Solar-Frost{% endblock %}</title>
+    
+    <!-- Fonts: Solar-Frost Core -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    colors: {
+                        solar: '#22d3ee',
+                        obsidian: '#020617',
+                        indigo: '#080c1d',
+                    },
                     fontFamily: {
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
-                        'scan': 'scan 3s linear infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        scan: {
-                            '0%': { transform: 'translateY(-100%)' },
-                            '100%': { transform: 'translateY(100%)' },
-                        }
+                        'academic': ['Outfit', 'sans-serif'],
+                        'tactical': ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
         }
     </script>
-    <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --accent: #06b6d4;
-            --danger: #ef4444;
-        }
-        body { 
-            font-family: 'Inter', sans-serif;
-            background-color: #020617;
-            color: #f1f5f9;
-            min-height: 100vh;
-            overflow-x: hidden;
-            perspective: 2000px;
-        }
-        .aether-surface {
-            transform-style: preserve-3d;
-            transform: rotateX(2deg);
-            transition: transform 0.5s ease;
-        }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-        }
-        .text-gradient {
-            background: linear-gradient(to right, var(--accent), var(--primary), var(--secondary));
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        #particle-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-        .terminal-log {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            line-height: 1.2;
-        }
-        .slot-machine {
-            display: inline-block;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-    </style>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="flex flex-col relative min-h-screen">
-
-    <!-- Active Shield Particle Canvas -->
-    <canvas id="particle-canvas"></canvas>
-
-    <!-- LunaPhoenix Terminal Overlay -->
-    <div id="terminal-overlay" class="fixed top-0 left-0 w-full h-0 bg-black/90 z-[100] overflow-hidden transition-all duration-500 border-b border-indigo-500/50">
-        <div class="p-6 h-full flex flex-col">
-            <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                    <span class="ml-4 font-mono text-xs text-indigo-400 font-bold uppercase tracking-widest">Aether-Chasm Direct Link // LunaPhoenix Kernel</span>
-                </div>
-                <span class="text-[10px] text-gray-500 font-mono">ENCRYPTED // Q-RESISTANT</span>
-            </div>
-            <div id="terminal-content" class="flex-grow terminal-log text-green-400/80 overflow-y-auto space-y-1">
-                <div>[SYSTEM] Booting Aether-Chasm Security Layer...</div>
-                <div>[KERNEL] Initializing Lattice-Based PQC Signatures... OK</div>
-                <div>[SENTINEL] Polling Hardware TPM State... OK</div>
+<body class="bg-achromatic min-height-screen flex flex-col">
+    <!-- BACKGROUND DEPTH LAYERS -->
+    <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+    <div id="grid-dots" class="fixed inset-0 pointer-events-none z-0 opacity-10" style="background-image: radial-gradient(#6366F1 0.5px, transparent 0.5px); background-size: 30px 30px;"></div>
+    
+    <!-- NEURAL SEARCH OVERLAY -->
+    <div id="neural-search-overlay" class="neural-overlay">
+        <div class="max-w-2xl w-full px-6">
+            <input id="search-input-neural" type="text" placeholder="Search the Magic Portal..." 
+                class="magic-input text-2xl py-6 px-10 border-solar focus:ring-4 focus:ring-solar/20 shadow-[0_0_50px_rgba(34,211,238,0.2)]">
+            <div class="mt-4 flex gap-4 text-[10px] font-mono text-gray-500 justify-center">
+                <span>[ESC] TO EXIT</span>
+                <span>[ENTER] TO SEARCH</span>
             </div>
         </div>
     </div>
 
-    <nav class="glass-panel sticky top-0 z-50 border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex-shrink-0 flex items-center gap-4 group cursor-pointer">
-                    <div class="h-10 w-10 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.4)] group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <span class="font-bold text-xl tracking-tighter uppercase italic">EduTech <span class="text-gradient">Aether</span></span>
+    <!-- AI TUTOR DRAWER -->
+    <div id="ai-tutor-drawer" class="fixed top-0 right-0 h-full w-80 cyber-glass translate-x-full z-[60] p-6 transition-transform duration-500 border-l border-white/10">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-10">
+                <div>
+                    <h2 class="text-2xl font-academic font-bold text-white uppercase tracking-tighter">AI_TUTOR::ORION</h2>
+                    <p class="text-[9px] font-tactical text-cyber-indigo uppercase tracking-[0.4em]">Offline_Intelligence_Node</p>
                 </div>
-                <div class="flex space-x-4 items-center">
-                    {% if current_user.is_authenticated %}
-                        <div class="hidden md:flex items-center gap-2 text-[10px] font-mono text-cyan-400 bg-cyan-950/30 px-2 py-1 rounded border border-cyan-500/30">
-                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                            SECURE_NODE: {{ current_user.id }}
-                        </div>
-                        <a href="{{ url_for('profile.dashboard') }}" class="text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">Portal</a>
-                        <a href="{{ url_for('profile.security_settings') }}" class="text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">Security</a>
-                        <a href="{{ url_for('auth.logout') }}" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white px-5 py-2 rounded text-xs font-bold transition-all transition-all">DE-LINK</a>
-                    {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">Link</a>
-                    {% endif %}
+                <button onclick="toggleTutor()" class="w-10 h-10 rounded-full cyber-glass flex items-center justify-center hover:bg-white/5 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            
+            <!-- ORION MESSAGE LOG -->
+            <div id="orion-log" class="flex-grow ghost-scroll overflow-y-auto space-y-6 pr-2 mb-8">
+                <div class="cyber-glass p-4 border-cyber-indigo/20">
+                    <p class="text-[11px] font-academic text-white/80 leading-relaxed">
+                        <span class="text-cyber-indigo font-bold mr-2">[ORION]</span> Hello Operative {{ current_user.email if current_user.is_authenticated else 'Guest' }}. I am Orion, your primary educational interface. How can I assist your learning trajectory today?
+                    </p>
                 </div>
             </div>
+
+            <!-- CHAT INPUT -> QUICK ACTIONS -->
+            <div class="grid grid-cols-1 gap-2 mt-4 text-left">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                    <button onclick="sendToOrion('System Audit')" class="btn-magnetic w-full text-left cyber-glass border-cyber-indigo/20 hover:border-cyber-indigo/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all mb-2 flex justify-between items-center group">
+                        <span class="text-cyber-indigo group-hover:text-white transition-colors"> System Audit</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyber-indigo opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    <button onclick="sendToOrion('Active Threats')" class="btn-magnetic w-full text-left cyber-glass border-rose-500/20 hover:border-rose-500/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all flex justify-between items-center group">
+                        <span class="text-rose-500 group-hover:text-white transition-colors"> Active Threats</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-rose-500 opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    {% elif current_user.role == 'teacher' %}
+                    <button onclick="sendToOrion('Class Progress')" class="btn-magnetic w-full text-left cyber-glass border-cyber-violet/20 hover:border-cyber-violet/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all mb-2 flex justify-between items-center group">
+                        <span class="text-cyber-violet group-hover:text-white transition-colors"> Class Progress</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyber-violet opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    <button onclick="sendToOrion('Student Alerts')" class="btn-magnetic w-full text-left cyber-glass border-white/5 hover:border-white/30 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all flex justify-between items-center group">
+                        <span class="text-gray-400 group-hover:text-white transition-colors"> Student Alerts</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    {% else %}
+                    <button onclick="sendToOrion('Security Status')" class="btn-magnetic w-full text-left cyber-glass border-cyber-indigo/20 hover:border-cyber-indigo/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all mb-2 flex justify-between items-center group">
+                        <span class="text-cyber-indigo group-hover:text-white transition-colors"> Security Status</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyber-indigo opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    <button onclick="sendToOrion('Academic Progress')" class="btn-magnetic w-full text-left cyber-glass border-cyber-violet/20 hover:border-cyber-violet/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all mb-2 flex justify-between items-center group">
+                        <span class="text-cyber-violet group-hover:text-white transition-colors"> Academic Progress</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyber-violet opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    <button onclick="sendToOrion('Upcoming Classes')" class="btn-magnetic w-full text-left cyber-glass border-white/5 hover:border-white/30 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all flex justify-between items-center group">
+                        <span class="text-gray-400 group-hover:text-white transition-colors"> Upcoming Classes</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                    {% endif %}
+                <button onclick="openClearanceModal('identity')" class="btn-magnetic w-full text-left cyber-glass border-cyber-indigo/20 hover:border-cyber-indigo/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all mb-2 flex justify-between items-center group">
+                    <span class="text-cyber-indigo group-hover:text-white transition-colors"> Req_Identity_Whitelist</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyber-indigo opacity-50"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+                <button onclick="openClearanceModal('ip')" class="btn-magnetic w-full text-left cyber-glass border-rose-500/20 hover:border-rose-500/60 px-4 py-3 text-[10px] font-bold tracking-widest uppercase transition-all flex justify-between items-center group">
+                    <span class="text-rose-500 group-hover:text-white transition-colors"> Req_IP_Clearance</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-rose-500 opacity-50"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- CLEARANCE MODALS -->
+    <div id="clearance-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="max-w-md w-full cyber-glass p-8 border-t-2 border-cyber-indigo relative scale-95 transition-transform duration-300" id="clearance-modal-content">
+            <button onclick="closeClearanceModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <h2 class="text-2xl font-academic font-bold text-white uppercase tracking-tighter mb-2" id="clearance-title">Nexus_Clearance</h2>
+            <p class="text-[9px] font-tactical text-gray-400 uppercase mb-8" id="clearance-desc">Submit intelligence for review.</p>
+            
+            <form action="{{ url_for('auth.request_clearance') }}" method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="type" id="clearance-type" value="identity">
+                
+                <div id="clearance-role-group">
+                    <label class="block text-[10px] font-academic font-bold text-cyber-indigo uppercase tracking-widest mb-2">Requested_Role</label>
+                    <select name="role_requested" id="clearance-role" class="magic-input w-full bg-black/40 border-white/5 py-4 px-4 text-xs font-academic text-white focus:border-cyber-indigo/50">
+                        <option value="student">STUDENT_OPERATIVE</option>
+                        <option value="teacher">FACULTY_NODE</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-academic font-bold text-cyber-indigo uppercase tracking-widest mb-2" id="clearance-id-label">Target_Identifier</label>
+                    <input type="text" name="identifier" id="clearance-identifier" class="magic-input w-full bg-black/40 border-white/5 py-4 px-4 text-xs font-academic text-white focus:border-cyber-indigo/50" placeholder="Campus_ID or Node_IP" required>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-academic font-bold text-cyber-indigo uppercase tracking-widest mb-2">Transmission_Log</label>
+                    <textarea name="reason" class="magic-input w-full bg-black/40 border-white/5 py-4 px-4 text-xs font-academic text-white h-24 focus:border-cyber-indigo/50" placeholder="State your justification for nexus access or quarantine release..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-magnetic w-full bg-cyber-indigo/20 text-cyber-indigo border border-cyber-indigo/40 py-4 font-bold uppercase tracking-widest text-[10px] transition-colors hover:bg-cyber-indigo/40 hover:text-white">INITIATE_HANDSHAKE</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CYBER-GLASS NAVIGATION -->
+    <nav class="magic-nav flex items-center justify-between">
+        <div class="flex items-center gap-10">
+            <a href="{% if current_user.is_authenticated and current_user.role == 'admin' %}{{ url_for('admin.dashboard') }}{% else %}{{ url_for('profile.dashboard') }}{% endif %}" class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyber-indigo to-cyber-violet flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="leading-none">
+                    <span class="block text-xl font-academic font-bold tracking-tighter text-white">EDUVIA</span>
+                    <span class="text-[8px] font-tactical text-gray-500 uppercase tracking-widest">Neural_Security_Framework</span>
+                </div>
+            </a>
+            
+            <div class="hidden md:flex items-center gap-6">
+                {% if not current_user.is_authenticated or current_user.role != 'admin' %}
+                <a href="{{ url_for('profile.dashboard') }}" class="text-[10px] font-academic font-bold text-gray-400 hover:text-white uppercase tracking-widest transition-colors">Workspace</a>
+                <a href="#" class="text-[10px] font-academic font-bold text-gray-400 hover:text-white uppercase tracking-widest transition-colors">Courses</a>
+                {% else %}
+                <a href="{{ url_for('admin.dashboard') }}" class="text-[10px] font-academic font-bold text-cyber-indigo hover:text-white uppercase tracking-widest transition-colors">Admin_Nucleus</a>
+                {% endif %}
+                <a href="{{ url_for('profile.security_settings') }}" class="text-[10px] font-academic font-bold text-gray-400 hover:text-white uppercase tracking-widest transition-colors">Security</a>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <button onclick="toggleNeuralSearch()" class="p-2 text-gray-500 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+            <button onclick="toggleAITutor()" class="p-2 text-gray-500 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+            </button>
+            
+            {% if current_user.is_authenticated %}
+                <div class="h-8 w-px bg-white/10"></div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <span class="block text-[10px] font-academic font-bold text-white uppercase tracking-widest">{{ current_user.email.split('@')[0] }}</span>
+                        <span class="block text-[8px] font-tactical text-gray-600 uppercase">{{ current_user.role }}</span>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="w-8 h-8 cyber-glass flex items-center justify-center text-gray-500 hover:text-red-400 magic-press">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </nav>
 
-    <main class="flex-grow flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto aether-surface animate-fade-in-up">
-        
+    <!-- CONTENT VORTEX -->
+    <main class="flex-grow relative z-10 w-full">
+        <!-- FLASH SIGNALS -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mb-8 w-full max-w-lg mx-auto z-50 fixed top-24 left-1/2 transform -translate-x-1/2 space-y-2">
-                {% for category, message in messages %}
-                    <div class="glass-panel p-4 rounded border-l-4 {{ 'border-emerald-500' if category == 'success' else 'border-rose-500' }} flex items-center shadow-2xl animate-fade-in-up">
-                        <div class="font-mono text-xs font-bold uppercase tracking-widest {{ 'text-emerald-400' if category == 'success' else 'text-rose-400' }}">
-                            [{{ category }}] {{ message }}
-                        </div>
-                    </div>
-                {% endfor %}
+          {% if messages %}
+            <div class="fixed top-24 right-8 z-[100] space-y-4">
+              {% for category, message in messages %}
+                <div class="cyber-glass p-4 border-l-4 border-solar bg-indigo-500/5 reveal-on-scroll">
+                    <span class="text-[10px] font-mono text-white tracking-widest">{{ message }}</span>
                 </div>
-            {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}
-
     </main>
-    
-    <footer class="mt-auto py-10 px-8 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-white/5 bg-black/40 backdrop-blur-xl">
-        <div class="flex flex-col gap-1">
-            <p class="font-black text-xs tracking-[0.2em] text-gray-500 uppercase">System Identity // <span class="text-indigo-500">PRJN26-175</span></p>
-            <p class="text-[10px] font-mono text-gray-600 uppercase">Aether-Chasm Protocol v2.0.4-Lattice</p>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 group cursor-help">
-                <div class="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_var(--accent)] animate-pulse"></div>
-                <span class="text-[10px] font-mono text-cyan-500/80 uppercase font-bold tracking-widest">Quantum Resistant Armor Enabled</span>
-            </div>
-            <div class="h-4 w-px bg-white/10"></div>
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] font-mono text-emerald-500/80 uppercase font-bold tracking-widest">Hardware Link Active</span>
+
+    <!-- STATUS BAR -->
+    <footer class="relative z-10 py-6 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <p class="text-[9px] font-tactical text-gray-600 uppercase tracking-widest">&copy; 2026 EDUVIA.PRO // NEURAL_HANDSHAKE_ACTIVE</p>
+            <div class="flex gap-6">
+                <div class="text-[9px] font-tactical text-gray-600 uppercase tracking-widest">Latency: <span class="text-solar/40">12ms</span></div>
+                <div class="text-[9px] font-tactical text-gray-600 uppercase tracking-widest">Protocol: <span class="text-solar/40">AES-256-QUBIT</span></div>
             </div>
         </div>
     </footer>
 
-    <!-- UI Logic Scripts -->
+    <!-- SHARED SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="{{ url_for('static', filename='lumina.js') }}"></script>
+    <script src="{{ url_for('static', filename='magic.js') }}"></script>
     <script>
-        // Particle Web Engine
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let threatLevel = 0; // 0 to 1
-
-        function initParticles() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            for(let i=0; i<80; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
-                    size: Math.random() * 2 + 1
-                });
-            }
+        function toggleNeuralSearch() {
+            const overlay = document.getElementById('neural-search-overlay');
+            overlay.classList.toggle('active');
+            if(overlay.classList.contains('active')) document.getElementById('search-input-neural').focus();
         }
-
-        function drawParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const color = threatLevel > 0.5 ? `239, 68, 68` : `99, 102, 241`;
-            ctx.strokeStyle = `rgba(${color}, ${0.1 + (threatLevel * 0.3)})`;
-            ctx.fillStyle = `rgba(${color}, ${0.4 + (threatLevel * 0.4)})`;
-
-            particles.forEach((p, i) => {
-                p.x += p.vx * (1 + threatLevel * 5);
-                p.y += p.vy * (1 + threatLevel * 5);
-
-                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-
-                for(let j=i+1; j<particles.length; j++) {
-                    const p2 = particles[j];
-                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if(dist < 150) {
-                        ctx.lineWidth = (150 - dist) / 100;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(drawParticles);
+        function toggleAITutor() {
+            const drawer = document.getElementById('ai-tutor-drawer');
+            drawer.classList.toggle('translate-x-full');
         }
-
-        window.addEventListener('resize', initParticles);
-        initParticles();
-        drawParticles();
-
-        // LunaPhoenix Terminal Control
         document.addEventListener('keydown', (e) => {
-            if(e.ctrlKey && e.key === '~') {
-                e.preventDefault();
-                const overlay = document.getElementById('terminal-overlay');
-                overlay.style.height = overlay.style.height === '40%' ? '0' : '40%';
-                logToTerminal(`[UI] Toggling Command Interface... ${overlay.style.height === '40%' ? 'OPEN' : 'CLOSED'}`);
+            if(e.key === 'Escape') {
+                document.getElementById('neural-search-overlay').classList.remove('active');
+                document.getElementById('ai-tutor-drawer').classList.add('translate-x-full');
             }
         });
-
-        function logToTerminal(msg) {
-            const container = document.getElementById('terminal-content');
-            if(!container) return;
-            const div = document.createElement('div');
-            const now = new Date().toLocaleTimeString('en-US', { hour12: false });
-            div.innerHTML = `<span class="opacity-40">[${now}]</span> ${msg}`;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // Sentinel Protection Module
-        const Sentinel = {
-            KEY_NAME: "aether_chasm_sentinel_v2",
-            ALGO: {
-                name: "RSASSA-PKCS1-v1_5",
-                modulusLength: 2048,
-                publicExponent: new Uint8Array([1, 0, 1]),
-                hash: "SHA-256"
-            },
-
-            async linkHardware() {
-                try {
-                    logToTerminal("[SENTINEL] Initializing Hardware Link...");
-                    const keyPair = await window.crypto.subtle.generateKey(
-                        this.ALGO,
-                        false, // non-exportable private key
-                        ["sign", "verify"]
-                    );
-                    
-                    // Save private key to IndexedDB (Secure store)
-                    const db = await this._getDB();
-                    const tx = db.transaction("keys", "readwrite");
-                    tx.objectStore("keys").put(keyPair.privateKey, this.KEY_NAME);
-                    
-                    // Export public key to PEM
-                    const exported = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
-                    const pem = this._arrayBufferToPem(exported, "PUBLIC KEY");
-                    
-                    const nodeId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-                                        .map(b => b.toString(16).padStart(2, '0')).join('');
-
-                    logToTerminal("[SENTINEL] Transmitting Public Signature to Kernel...");
-                    const response = await fetch('/auth/register-sentinel', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ public_key: pem, node_id: nodeId })
-                    });
-                    
-                    const data = await response.json();
-                    if(data.status === 'ok') {
-                        logToTerminal("[SENTINEL] Hardware Bound Successfully.");
-                        window.location.reload();
-                    } else {
-                        throw new Error(data.message);
-                    }
-                } catch (e) {
-                    logToTerminal(`[SENTINEL] Error: ${e.message}`);
-                }
-            },
-
-            async signChallenge(nonce) {
-                try {
-                    logToTerminal("[SENTINEL] Processing Hardware Handshake...");
-                    const db = await this._getDB();
-                    const privateKey = await new Promise((resolve) => {
-                        db.transaction("keys").objectStore("keys").get(this.KEY_NAME).onsuccess = (e) => resolve(e.target.result);
-                    });
-
-                    if(!privateKey) throw new Error("Hardware Key Not Found.");
-
-                    const signature = await window.crypto.subtle.sign(
-                        this.ALGO,
-                        privateKey,
-                        new TextEncoder().encode(nonce)
-                    );
-
-                    return btoa(String.fromCharCode(...new Uint8Array(signature)));
-                } catch (e) {
-                    logToTerminal(`[SENTINEL] Handshake Failed: ${e.message}`);
-                    return null;
-                }
-            },
-
-            _getDB() {
-                return new Promise((resolve, reject) => {
-                    const req = indexedDB.open("AetherChasm", 1);
-                    req.onupgradeneeded = () => req.result.createObjectStore("keys");
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = () => reject(req.error);
-                });
-            },
-
-            _arrayBufferToPem(buffer, label) {
-                const binary = String.fromCharCode(...new Uint8Array(buffer));
-                const base64 = btoa(binary);
-                const lines = base64.match(/.{1,64}/g) || [];
-                return `-----BEGIN ${label}-----\n${lines.join('\n')}\n-----END ${label}-----`;
-            }
-        };
     </script>
-</body>
-</html>
+    {% block extra_scripts %}{% endblock %}
+
 </body>
 </html>

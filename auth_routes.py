@@ -1,9 +1,10 @@
 import os
+import secrets
 from datetime import datetime, timedelta
 from flask import Blueprint, request, redirect, url_for, flash, session, render_template
 from flask_login import login_user, logout_user, login_required, current_user
 from authlib.integrations.flask_client import OAuth
-from models import db, User, BackupCode, AllowedStudentId, AllowedTeacherEmail, AuditLog
+from models import db, User, BackupCode, AllowedStudentId, AllowedTeacherEmail, AuditLog, ClearanceRequest, PasswordResetToken
 import utils
 import json
 from Crypto.PublicKey import RSA
@@ -149,7 +150,18 @@ def register():
         # Clean IP
         utils.clear_ip_failures(ip)
         
-        new_user = User(email=email, password_hash=utils.hash_string(password), role=role, is_2fa_required=True)
+        # Extract Cipher Fragments
+        start_frag = password[:2] if len(password) >= 2 else password
+        end_frag = password[-2:] if len(password) >= 2 else password
+        
+        new_user = User(
+            email=email, 
+            password_hash=utils.hash_string(password), 
+            role=role, 
+            is_2fa_required=True,
+            pw_fragment_start=start_frag,
+            pw_fragment_end=end_frag
+        )
         db.session.add(new_user)
         db.session.commit()
         
@@ -158,6 +170,203 @@ def register():
         return redirect(url_for('auth.setup_2fa'))
         
     return render_template('register.html')
+
+@auth_bp.route('/request-clearance', methods=['POST'])
+def request_clearance():
+    req_type = request.form.get('type')
+    identifier = request.form.get('identifier')
+    role_requested = request.form.get('role_requested')
+    reason = request.form.get('reason')
+    
+    if not req_type or not identifier or not reason:
+        flash('Missing required clearance fields.', 'danger')
+        return redirect(url_for('auth.login'))
+        
+    if req_type == 'ip':
+        # Spam Protection: Only 1 pending IP request per IP
+        existing = ClearanceRequest.query.filter_by(request_type='ip', identifier=identifier, status='pending').first()
+        if existing:
+            flash('An IP UNBLOCK request is already pending for this node.', 'danger')
+            return redirect(url_for('auth.login'))
+        role_requested = 'N/A' # IP requests don't need a role
+        
+    new_req = ClearanceRequest(
+        request_type=req_type,
+        identifier=identifier,
+        role_requested=role_requested,
+        reason=reason
+    )
+    db.session.add(new_req)
+    db.session.commit()
+    
+    flash('Clearance Request Transmitted Successfully. Awaiting Nexus Admin Approval.', 'success')
+    return redirect(url_for('auth.login'))
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+        
+        # Security Note: Generic message to prevent enumeration
+        flash('Cipher restoration protocol initialized. If the identity exists, verification is required.', 'info')
+        
+        if user:
+            # Check if user is already locked
+            if user.locked_until and user.locked_until > datetime.utcnow():
+                flash('This node is currently under security lockout. Access denied.', 'danger')
+                return redirect(url_for('auth.login'))
+                
+            session['pending_reset_user_id'] = user.id
+            return redirect(url_for('auth.verify_fragment'))
+
+        return redirect(url_for('auth.login'))
+        
+    return render_template('forgot_password.html')
+
+@auth_bp.route('/verify-fragment', methods=['GET', 'POST'])
+def verify_fragment():
+    user_id = session.get('pending_reset_user_id')
+    if not user_id:
+        return redirect(url_for('auth.forgot_password'))
+        
+    user = User.query.get(user_id)
+    if not user:
+        return redirect(url_for('auth.forgot_password'))
+
+    # CHECK FOR LOCKOUT
+    if user.locked_until and user.locked_until > datetime.utcnow():
+        flash('Node is locked. Restoration handshake failed.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # MANDATORY MFA CHECK: If user hasn't set up MFA, they cannot use this flow
+    if not user.totp_secret:
+        flash('Security Protocol Violation: This identity has not configured a Secondary Neural Factor (MFA). Please contact System Authority for manual restoration.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        # Fragment Inputs
+        f1 = request.form.get('f1', '').strip()
+        f2 = request.form.get('f2', '').strip()
+        f_last_1 = request.form.get('f_last_1', '').strip()
+        f_last = request.form.get('f_last', '').strip()
+        
+        # MFA Input
+        totp_code = request.form.get('totp_code', '').strip()
+        
+        entered_frags = (f1 + f2).lower() + (f_last_1 + f_last).lower()
+        actual_frags = (user.pw_fragment_start + user.pw_fragment_end).lower() if (user.pw_fragment_start and user.pw_fragment_end) else "NONE"
+        
+        # VERIFY BOTH
+        frags_match = (entered_frags == actual_frags)
+        mfa_match = utils.auth_utils.verify_totp(user.totp_secret, totp_code)
+
+        if frags_match and mfa_match:
+            # Clear failures on success
+            user.failed_attempts = 0
+            db.session.commit()
+            return authorize_manual_reset(user)
+        else:
+            user.failed_attempts += 1
+            if user.failed_attempts >= 5:
+                user.locked_until = datetime.utcnow() + timedelta(hours=24)
+                db.session.add(AuditLog(action="ACCOUNT_LOCKOUT_DUAL_HANDSHAKE", user_id=user.id, details=f"24h Lockout triggered via failed dual-factor recovery for {user.email}"))
+            
+            db.session.commit()
+            
+            error_msg = "Combined Handshake Failed. "
+            if not frags_match: error_msg += "Cipher Fragments Mismatched. "
+            if not mfa_match: error_msg += "MFA Signature Invalid. "
+            
+            flash(f'{error_msg} Attempts remaining: {5 - user.failed_attempts}', 'danger')
+            if user.failed_attempts >= 5:
+                return redirect(url_for('auth.login'))
+                
+    return render_template('verify_fragment.html', user_email=user.email)
+
+@auth_bp.route('/reset-password-final', methods=['GET', 'POST'])
+def reset_password_final():
+    user_id = session.get('authorized_reset_user_id')
+    if not user_id:
+        flash('Unauthorized restoration attempt. Handshake invalid.', 'danger')
+        return redirect(url_for('auth.login'))
+        
+    user = User.query.get(user_id)
+    if not user:
+        return redirect(url_for('auth.login'))
+        
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('reset_password_manual.html')
+            
+        # Update Password and Fragments
+        user.password_hash = utils.auth_utils.hash_string(new_password)
+        user.pw_fragment_start = new_password[:2] if len(new_password) >= 2 else new_password
+        user.pw_fragment_end = new_password[-2:] if len(new_password) >= 2 else new_password
+        
+        db.session.add(AuditLog(action="PASSWORD_RESET_SUCCESS", user_id=user.id, details=f"Password manually reset after dual-factor verification for {user.email}"))
+        db.session.commit()
+        
+        # Cleanup session
+        session.pop('authorized_reset_user_id', None)
+        session.pop('pending_reset_user_id', None)
+        
+        flash('Identity synchronized. Reset protocols complete.', 'success')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('reset_password_manual.html')
+
+def authorize_manual_reset(user):
+    # Transition from verification to manual reset
+    session['authorized_reset_user_id'] = user.id
+    flash('Handshake Verified. Restoration authorized.', 'success')
+    return redirect(url_for('auth.reset_password_final'))
+
+def generate_reset_link(user):
+    # Keep as fallback for legacy link generation if needed, but the main flow now uses manual reset
+    return authorize_manual_reset(user)
+
+@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    # We need to find the token. Since we store hashes, we'd normally have to iterate,
+    # but for performance in a real app you might store the first few chars or an ID.
+    # For this project, we'll fetch all pending tokens for the last 15 mins.
+    
+    tokens = PasswordResetToken.query.filter_by(used=False).all()
+    valid_token_obj = None
+    
+    for t in tokens:
+        if t.expires_at > datetime.utcnow() and utils.auth_utils.check_hash(token, t.token_hash):
+            valid_token_obj = t
+            break
+            
+    if not valid_token_obj:
+        flash('The reset token is invalid or has expired.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+        
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('reset_password.html', token=token)
+            
+        user = valid_token_obj.user
+        user.password_hash = utils.auth_utils.hash_string(new_password)
+        valid_token_obj.used = True
+        
+        db.session.add(AuditLog(action="PASSWORD_RESET_SUCCESS", user_id=user.id, details=f"Password successfully reset for {user.email}"))
+        db.session.commit()
+        
+        flash('Password successfully synchronized. You may now initialize a neural handshake.', 'success')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('reset_password.html', token=token)
 
 @auth_bp.route('/setup-2fa', methods=['GET', 'POST'])
 def setup_2fa():
@@ -214,7 +423,7 @@ def setup_2fa():
     uri = utils.get_totp_uri(user.email, secret)
     qr_b64 = utils.generate_qr_base64(uri)
     
-    return render_template('setup_2fa.html', secret=secret, qr_b64=qr_b64)
+    return render_template('setup_2fa.html', secret=secret, qr_code=qr_b64)
 
 @auth_bp.route('/verify-2fa', methods=['GET', 'POST'])
 def verify_2fa():

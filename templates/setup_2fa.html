@@ -1,37 +1,70 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="h-full flex items-center justify-center w-full mt-24">
-    <div class="glass-panel p-10 rounded-3xl max-w-xl w-full relative overflow-hidden border border-indigo-500/30">
-        
-        <div class="relative z-10 text-center">
-            <h2 class="text-3xl font-black tracking-tighter uppercase italic mb-2">Sync Authenticator</h2>
-            <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-10">Scan the QR code below to bind your mobile node.</p>
+<div class="max-w-4xl mx-auto px-6 py-12 relative">
+    
+    <div class="text-center mb-16">
+        <h1 class="text-4xl font-academic font-bold text-white uppercase tracking-tighter mb-2">BIPARTITE_SYNC</h1>
+        <p class="text-[10px] font-tactical text-solar/60 uppercase tracking-[0.4em]">Establish Persistent Security Link</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-12 items-start">
+        <!-- Visuals & Matrix -->
+        <div class="frost-panel p-8 shadow-2xl relative">
+            <!-- Holographic Scanner -->
+            <div class="nexus-scanner"></div>
+
+            <h3 class="text-[10px] font-academic font-bold text-solar uppercase tracking-widest mb-6">Visual_Sync_Matrix</h3>
             
-            <div class="flex justify-center mb-8">
-                <div class="p-4 bg-white rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.2)] border border-indigo-500/20">
-                    <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Code" class="w-48 h-48 mix-blend-multiply">
+            <p class="text-[10px] font-academic text-gray-400 leading-relaxed mb-8">
+                Scan the generated visual matrix into your authenticator node to establish your secondary identity vector.
+            </p>
+
+            <div class="p-6 bg-white flex justify-center rounded group hover:border-solar/40 transition-colors shadow-xl">
+                <img src="data:image/png;base64,{{ qr_code }}" class="w-48 h-48 filter grayscale group-hover:grayscale-0 transition-all" alt="QR Code">
+                <div class="absolute inset-0 bg-solar/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+
+            <div class="mt-8 space-y-4">
+                <p class="text-[9px] font-tactical text-gray-500 uppercase tracking-widest">Manual_Key_Override:</p>
+                <div class="p-4 bg-black/40 border border-white/5 font-tactical text-[11px] text-solar select-all cursor-copy text-center tracking-widest">
+                    {{ secret }}
                 </div>
             </div>
+        </div>
 
-            <div class="bg-black/40 border border-white/5 rounded-xl p-4 mb-8">
-                <p class="text-[8px] font-mono text-gray-600 uppercase tracking-widest mb-2">Manual Intervention Key</p>
-                <div class="text-lg font-mono font-black tracking-[0.4em] text-indigo-400">{{ secret }}</div>
-            </div>
+        <!-- Verification Form -->
+        <div class="frost-panel p-8">
+            <h3 class="text-lg font-academic font-bold text-white mb-8 border-l-4 border-solar pl-4 uppercase">
+                Verify_Handshake
+            </h3>
 
-            <form action="{{ url_for('auth.setup_2fa') }}" method="POST" class="space-y-6">
+            <p class="text-[10px] font-academic text-gray-400 leading-relaxed mb-8 uppercase tracking-widest">
+                Enter the first 6-digit fragment to finalize the enrollment process.
+            </p>
+
+            <form action="{{ url_for('auth.setup_2fa') }}" method="POST" class="space-y-8">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 
                 <div class="group">
-                    <label class="block text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-4 group-focus-within:text-indigo-400 transition-colors">Enter 6-Digit Sync Code</label>
-                    <input type="text" name="totp_code" required pattern="[0-9]{6}" autocomplete="off" class="w-full bg-black/20 border border-white/10 rounded-lg p-5 text-center text-3xl font-mono tracking-[0.5em] text-white focus:outline-none focus:border-indigo-500 transition-all" placeholder="000000">
+                    <label class="block text-[10px] font-tactical font-bold text-gray-500 uppercase tracking-widest mb-4 group-focus-within:text-solar transition-colors">Verification_Fragment</label>
+                    <input name="totp_code" type="text" maxlength="6" required 
+                        class="w-full bg-solar/5 border border-solar/20 p-4 text-3xl text-center font-tactical text-white tracking-[0.4em] focus:outline-none focus:border-solar focus:ring-1 focus:ring-solar/50 transition-all" 
+                        placeholder="000000">
                 </div>
-                
-                <button type="submit" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all">
-                    Verify & Engage Armor
+
+                <button type="submit" class="w-full btn-solar py-4 text-sm tracking-[0.2em]">
+                    Finalize Connection
                 </button>
             </form>
+            
+            <div class="mt-8 text-center">
+                <a href="{{ url_for('profile.security_settings') }}" class="text-[9px] font-tactical font-bold text-solar/60 hover:text-solar uppercase tracking-widest transition-colors">
+                    Abort_Sync_Protocol
+                </a>
+            </div>
         </div>
     </div>
+
 </div>
 {% endblock %}

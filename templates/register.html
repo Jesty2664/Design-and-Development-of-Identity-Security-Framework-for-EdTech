@@ -1,89 +1,90 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="h-full flex items-center justify-center w-full mt-24">
-    <div class="glass-panel p-1 border-white/10 rounded-3xl max-w-5xl w-full relative overflow-hidden">
-        <div class="flex flex-col lg:flex-row rounded-[22px] overflow-hidden">
+<div class="max-w-xl mx-auto px-6 py-24 flex flex-col justify-center">
+    
+    <div class="reveal-on-scroll text-center mb-12">
+        <h1 class="text-4xl font-academic font-bold text-white uppercase tracking-tighter mb-2">OPERATIVE_ENROLLMENT</h1>
+        <p class="text-[10px] font-tactical text-cyber-indigo uppercase tracking-[0.4em]">Establish Global Identity</p>
+    </div>
+
+    <!-- Registration Enclave -->
+    <div class="cyber-glass p-10 edge-lit reveal-on-scroll">
+        <form action="{{ url_for('auth.register') }}" method="POST" class="space-y-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
-            <!-- Branding Panel -->
-            <div class="hidden lg:flex lg:w-4/12 bg-black/40 p-12 flex-col justify-between relative border-r border-white/5">
-                <div class="relative z-10">
-                    <h1 class="text-3xl font-black italic tracking-tighter uppercase mb-6 text-gradient">Node Genesis</h1>
-                    <p class="text-[10px] font-mono text-gray-500 leading-relaxed uppercase tracking-widest">Aether-Chasm Protocol // Layer 1: Registration</p>
+            <!-- Role Selection -->
+            <div class="grid grid-cols-2 gap-4">
+                <label class="cursor-pointer group">
+                    <input type="radio" name="role" value="student" checked class="hidden peer">
+                    <div class="cyber-glass p-4 text-center border-white/5 peer-checked:border-cyber-indigo/60 peer-checked:bg-cyber-indigo/5 transition-all magic-press">
+                        <span class="text-[10px] font-academic font-bold text-gray-500 peer-checked:text-cyber-indigo uppercase tracking-widest">Student Access</span>
+                    </div>
+                </label>
+                <label class="cursor-pointer group">
+                    <input type="radio" name="role" value="teacher" class="hidden peer">
+                    <div class="cyber-glass p-4 text-center border-white/5 peer-checked:border-cyber-violet/60 peer-checked:bg-cyber-violet/5 transition-all magic-press">
+                        <span class="text-[10px] font-academic font-bold text-gray-500 peer-checked:text-cyber-violet uppercase tracking-widest">Faculty Node</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block text-[10px] font-academic font-bold text-gray-400 uppercase tracking-widest ml-1">Campus_Authority_ID</label>
+                <input name="campus_id" type="text" required placeholder="STUDENT-XXX or FACULTY-XXX" 
+                    class="magic-input focus:ring-1 focus:ring-cyber-indigo/50">
+                <p class="text-[8px] font-tactical text-gray-600 uppercase tracking-wider ml-1">Must be present in the active whitelist pool.</p>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block text-[10px] font-academic font-bold text-gray-400 uppercase tracking-widest ml-1">Network_Alias (Email)</label>
+                <input name="email" type="email" required placeholder="name@yenepoya.edu.in" 
+                    class="magic-input focus:ring-1 focus:ring-cyber-indigo/50">
+            </div>
+
+            <div class="space-y-4 relative">
+                <label class="block text-[10px] font-academic font-bold text-gray-400 uppercase tracking-widest ml-1">Security_Cipher</label>
+                <div class="relative">
+                    <input name="password" id="password_field" type="password" required placeholder="••••••••••••" 
+                        class="magic-input focus:ring-1 focus:ring-cyber-indigo/50 pr-12">
+                    <button type="button" onclick="togglePassword('password_field', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyber-indigo transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
                 </div>
                 
-                <div class="relative z-10">
-                    <div class="p-4 bg-indigo-500/5 rounded-xl border border-indigo-500/20">
-                        <p class="text-[10px] font-mono text-indigo-400 uppercase tracking-widest">Status: Ready for Identity Mapping</p>
-                    </div>
+                <div class="mt-2 flex gap-1 h-0.5 w-full bg-white/5 relative overflow-hidden">
+                    <div id="strength_bar" class="absolute left-0 top-0 h-full bg-cyber-indigo transition-all duration-500" style="width: 0%"></div>
                 </div>
             </div>
 
-            <!-- Registration Form -->
-            <div class="w-full lg:w-8/12 p-10 lg:p-16 bg-black/60 backdrop-blur-3xl">
-                <div class="mb-10">
-                    <h2 class="text-2xl font-black uppercase italic tracking-tight mb-2">Create Identity</h2>
-                    <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Initialize your secure vector in the mesh.</p>
-                </div>
-
-                <form class="space-y-8" action="{{ url_for('auth.register') }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    
-                    <!-- Role Selection Matrix -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer group relative">
-                            <input type="radio" name="role" value="student" class="peer hidden" checked onchange="document.getElementById('id-label').innerText='Campus_ID';">
-                            <div class="p-4 bg-white/5 border border-white/10 rounded-xl text-center peer-checked:border-indigo-500 peer-checked:bg-indigo-500/10 transition-all">
-                                <p class="text-[10px] font-mono font-bold text-gray-500 peer-checked:text-indigo-400 uppercase tracking-widest group-hover:text-gray-300">Student Access</p>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer group relative">
-                            <input type="radio" name="role" value="teacher" class="peer hidden" onchange="document.getElementById('id-label').innerText='Instructor_Email';">
-                            <div class="p-4 bg-white/5 border border-white/10 rounded-xl text-center peer-checked:border-purple-500 peer-checked:bg-purple-500/10 transition-all">
-                                <p class="text-[10px] font-mono font-bold text-gray-500 peer-checked:text-purple-400 uppercase tracking-widest group-hover:text-gray-300">Faculty Access</p>
-                            </div>
-                        </label>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="group">
-                            <label id="id-label" class="block text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2">Campus_ID</label>
-                            <input name="identifier" type="text" required class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-xs font-mono text-white focus:outline-none focus:border-indigo-500 transition-all" placeholder="Required for Whitelist Verification">
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="group">
-                                <label class="block text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2 group-focus-within:text-indigo-400 transition-colors">Credential_ID</label>
-                                <input name="email" type="email" required class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-xs font-mono text-white focus:outline-none focus:border-indigo-500 transition-all" placeholder="your@yenepoya.edu">
-                            </div>
-                            <div class="group">
-                                <label class="block text-[10px] font-mono text-gray-600 uppercase tracking-widest mb-2 group-focus-within:text-indigo-400 transition-colors">Access_Cipher</label>
-                                <input name="password" type="password" required class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-xs font-mono text-white focus:outline-none focus:border-indigo-500 transition-all" placeholder="••••••••">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full py-4 bg-white text-black font-black text-xs uppercase tracking-widest rounded-lg shadow-2xl hover:bg-gray-200 transition-all transform hover:scale-[1.01]">
-                        Generate Identity
-                    </button>
-                </form>
-
-                <div class="mt-10 relative">
-                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
-                    <div class="relative flex justify-center"><span class="px-4 bg-black/60 text-[8px] font-mono text-gray-600 uppercase tracking-[0.3em]">Alternate Vector</span></div>
-                </div>
-
-                <div class="mt-6">
-                    <a href="{{ url_for('auth.google_login') }}" class="w-full flex items-center justify-center py-3 border border-white/10 rounded-lg hover:bg-white/5 transition-all">
-                        <span class="text-[10px] font-mono text-gray-300 uppercase tracking-widest">Register with Google Proxy</span>
-                    </a>
-                </div>
-
-                <p class="mt-10 text-center text-[10px] font-mono text-gray-600 uppercase tracking-widest">
-                    Existing Node? <a href="{{ url_for('auth.login') }}" class="text-indigo-400 hover:text-indigo-300 underline underline-offset-4">Authenticate</a>
-                </p>
-            </div>
-        </div>
+            <button type="submit" class="w-full btn-magnetic py-4 text-xs tracking-[0.2em] font-bold uppercase transition-all">
+                Enforce Registration
+            </button>
+        </form>
     </div>
+
+    <div class="mt-10 text-center reveal-on-scroll">
+        <p class="text-[10px] font-tactical text-gray-500 uppercase tracking-widest">
+            Existing Authority? <a href="{{ url_for('auth.login') }}" class="text-cyber-indigo hover:underline font-bold ml-2">Access_Vault</a>
+        </p>
+    </div>
+
 </div>
+
+<script>
+    const passField = document.getElementById('password_field');
+    const strengthBar = document.getElementById('strength_bar');
+    
+    passField.addEventListener('input', () => {
+        const val = passField.value;
+        let score = 0;
+        if (val.length > 8) score += 40;
+        if (/[A-Z]/.test(val)) score += 20;
+        if (/[0-9]/.test(val)) score += 20;
+        if (/[^A-Za-z0-9]/.test(val)) score += 20;
+        
+        strengthBar.style.width = score + '%';
+        strengthBar.style.boxShadow = score > 60 ? '0 0 10px rgba(99, 102, 241, 0.5)' : 'none';
+    });
+</script>
 {% endblock %}

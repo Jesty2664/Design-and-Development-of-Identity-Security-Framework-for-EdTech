@@ -1,47 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="h-full flex items-center justify-center w-full mt-24">
-    <div class="glass-panel p-10 rounded-3xl max-w-xl w-full relative overflow-hidden border border-indigo-500/30">
-        
-        <div class="relative z-10 text-center">
-            <h2 class="text-3xl font-black tracking-tighter uppercase italic mb-2">Matrix Challenge</h2>
-            <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-10">Enter the 6-digit sync code from your mobile node.</p>
-            
-            <form action="{{ url_for('auth.verify_2fa') }}" method="POST" class="space-y-6">
+<div class="min-h-[70vh] flex items-center justify-center px-4 py-12 relative">
+    
+    <div class="max-w-md w-full relative">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-academic font-bold text-white uppercase tracking-tighter mb-2">IDENTITY_CHALLENGE</h1>
+            <p class="text-[10px] font-tactical text-solar/60 uppercase tracking-[0.4em]">Possession Verification</p>
+        </div>
+
+        <div class="frost-panel relative z-10 text-center p-10 shadow-2xl">
+            <p class="text-[10px] font-academic text-gray-400 uppercase tracking-widest mb-10">Enter the 6-digit sync fragment from your device.</p>
+
+            <form action="{{ url_for('auth.verify_2fa') }}" method="POST" class="space-y-8">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 
                 <div class="group">
-                    <input type="text" name="totp_code" pattern="[0-9]{6}" placeholder="000000" autocomplete="off" class="w-full bg-black/20 border border-white/10 rounded-lg p-5 text-center text-4xl font-mono tracking-[0.5em] text-white focus:outline-none focus:border-indigo-500 transition-all placeholder-white/5">
+                    <label class="block text-[10px] font-tactical font-bold text-gray-500 uppercase tracking-widest mb-4 group-focus-within:text-solar transition-colors">Sync_Fragment</label>
+                    <input name="totp_code" type="text" maxlength="6" required autofocus 
+                        class="w-full bg-solar/5 border border-solar/20 p-6 text-4xl text-center font-tactical text-white tracking-[0.5em] focus:outline-none focus:border-solar focus:ring-1 focus:ring-solar/50 transition-all" 
+                        placeholder="000000">
                 </div>
-                
-                <button type="submit" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all">
-                    Authorize Node Access
+
+                <div class="group">
+                    <label class="block text-[10px] font-tactical font-bold text-gray-500 uppercase tracking-widest mb-4 group-focus-within:text-solar transition-colors">Analog_Backup_Fragment</label>
+                    <input name="backup_code" type="text" maxlength="64"
+                        class="w-full bg-solar/5 border border-white/10 p-2 text-sm text-center font-tactical text-gray-400 tracking-[0.2em] focus:outline-none focus:border-solar transition-all" 
+                        placeholder="Optional">
+                </div>
+
+                <button type="submit" class="w-full btn-solar py-4 text-sm tracking-[0.2em]">
+                    Validate Fragment
                 </button>
             </form>
 
-            <div class="mt-12 relative">
-                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
-                <div class="relative flex justify-center"><span class="px-4 bg-black/40 text-[8px] font-mono text-gray-600 uppercase tracking-[0.3em]">Emergency Protocols</span></div>
+            <div class="mt-10 pt-8 border-t border-white/5 space-y-4">
+                <p class="text-[9px] font-academic text-gray-500 uppercase tracking-widest leading-relaxed">
+                    Device out of sync? Use an emergency shard.
+                </p>
+                <div class="flex gap-4">
+                    <a href="{{ url_for('auth.recover_account') }}" class="flex-1 py-3 text-solar/60 font-tactical font-bold text-[9px] hover:text-solar transition-colors border border-solar/20 hover:bg-solar/5 uppercase tracking-widest">
+                        Emergency_Recovery
+                    </a>
+                </div>
             </div>
-
-            <div class="mt-8 grid grid-cols-1 gap-4">
-                <a href="{{ url_for('auth.recover_account') }}" class="text-[10px] font-mono text-purple-400 hover:text-purple-300 uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Initiate Shamir Social Recovery
-                </a>
-                
-                <button onclick="document.getElementById('backup-form').classList.toggle('hidden')" class="text-[10px] font-mono text-gray-500 hover:text-gray-400 uppercase tracking-widest transition-colors">
-                    Use One-Time Backup Hash
-                </button>
-            </div>
-
-            <form id="backup-form" action="{{ url_for('auth.verify_2fa') }}" method="POST" class="mt-6 hidden space-y-4">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="text" name="backup_code" placeholder="ENTER_8_DIGIT_HASH" class="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-center text-xs font-mono text-gray-400 focus:outline-none focus:border-indigo-500">
-                <button type="submit" class="w-full py-2 bg-white/5 text-gray-400 font-bold text-[10px] uppercase rounded-lg border border-white/10 hover:bg-white/10">Bypass Verification</button>
-            </form>
         </div>
     </div>
+
 </div>
 {% endblock %}

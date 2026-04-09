@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto px-6 py-24 flex flex-col justify-center items-center min-h-[80vh]">
+    <div class="text-center mb-12">
+        <div class="w-24 h-24 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-8 border border-rose-500/30 shadow-[0_0_50px_rgba(244,63,94,0.2)] animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        
+        <h1 class="text-5xl font-academic font-bold text-white uppercase tracking-tighter mb-4" style="text-shadow: 0 0 20px rgba(244, 63, 94, 0.4);">
+            ACCESS RESTRICTED
+        </h1>
+        <p class="text-xs font-tactical text-rose-500 uppercase tracking-widest mb-6 border-y border-rose-500/20 py-2 inline-block">
+            ERR_403: QUARANTINE PROTOCOL ACTIVE
+        </p>
+        
+        <div class="max-w-xl mx-auto cyber-glass p-8 border-rose-500/30 text-left">
+            <h3 class="text-[10px] font-academic font-bold text-white uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Diagnostic Data</h3>
+            <div class="space-y-2 text-[10px] font-mono text-gray-400">
+                <p><span class="text-white/60">NODE_IP:</span> {{ request.remote_addr }}</p>
+                <p><span class="text-white/60">STATUS:</span> <span class="text-rose-400">CONNECTION SEVERED</span></p>
+                <p class="mt-4 text-white/80 leading-relaxed">
+                    {{ error }}
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-12">
+            <p class="text-[9px] font-tactical text-gray-500 uppercase">Think this is an error? Use the AI Tutor to request network clearance.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

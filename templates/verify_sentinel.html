@@ -1,91 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="h-full flex items-center justify-center w-full mt-24">
-    <div class="glass-panel p-10 rounded-3xl max-w-lg w-full text-center relative overflow-hidden border border-cyan-500/30">
-        
-        <!-- Animated Scan Line -->
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/10 to-transparent h-20 w-full animate-scan pointer-events-none"></div>
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-20 relative">
+    
+    <div class="max-w-xl w-full relative">
 
-        <div class="relative z-10">
-            <div class="w-20 h-20 bg-cyan-950/50 rounded-full flex items-center justify-center mx-auto mb-8 border border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-                <svg class="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        <div class="frost-panel p-10 shadow-2xl relative z-10 text-center">
+            <!-- Holographic Scanner Animation -->
+            <div class="nexus-scanner"></div>
+
+            <div class="mb-10 text-center">
+                <h1 class="text-3xl font-academic font-bold text-white uppercase tracking-tighter mb-2">SENTINEL_SCAN</h1>
+                <p class="text-[10px] font-tactical text-solar/60 uppercase tracking-widest">Awaiting hardware bound signature verification.</p>
             </div>
 
-            <h2 class="text-3xl font-black tracking-tighter uppercase mb-2 italic">Sentinel Handshake</h2>
-            <p class="text-gray-400 font-mono text-[10px] uppercase tracking-[0.2em] mb-8">Hardware-Bound Identity Verification Required</p>
-            
-            <div id="status-box" class="bg-black/40 border border-white/5 rounded-lg p-4 mb-8 text-left">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[10px] font-mono text-gray-500">ENCLAVE_STATUS</span>
-                    <span id="enclave-status" class="text-[10px] font-mono text-cyan-400">WAITING...</span>
-                </div>
-                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="h-full bg-cyan-500 transition-all duration-1000 w-0"></div>
+            <!-- Scanner Visual -->
+            <div class="relative group mb-12">
+                <div class="absolute inset-0 bg-solar/5 blur-xl group-hover:bg-solar/10 transition-all"></div>
+                <div class="relative bg-black/40 border border-white/5 p-12 flex flex-col items-center justify-center overflow-hidden rounded">
+                    <!-- Scanner Beam Graphic -->
+                    <div class="w-full h-px bg-solar shadow-[0_0_15px_#22d3ee] absolute top-1/2 left-0 animate-[scan_3s_linear_infinite]"></div>
+                    
+                    <svg class="w-24 h-24 text-solar opacity-40 group-hover:opacity-100 transition-opacity mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-3.44A20.01 20.01 0 0110 21.01m7.243-7.243a20.01 20.01 0 00-7.243-7.243m7.243 7.243L19 21m-7.243-7.243a20.01 20.01 0 01-7.243-7.243M7.243 7.243L5 3m7.243 4.243L12 3m7.243 4.243L21 3"></path>
+                    </svg>
+                    
+                    <div id="status-terminal" class="text-[10px] font-tactical text-gray-500 uppercase tracking-widest">
+                        [SYS] Ready for hardware_vector...
+                    </div>
                 </div>
             </div>
 
-            <button id="sign-btn" onclick="performHandshake()" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all transform hover:scale-[1.02]">
-                Initiate Handshake
-            </button>
+            <form id="sentinel-form" class="space-y-6">
+                <!-- Data placeholders -->
+                <input type="hidden" id="challenge" value="{{ challenge }}">
+                
+                <button type="button" onclick="verifySentinel()" id="verify-btn" 
+                    class="w-full btn-solar py-5 text-sm tracking-[0.2em]">
+                    Initiate Sentinel Handshake
+                </button>
+            </form>
 
-            <p class="mt-6 text-[10px] font-mono text-gray-500 uppercase tracking-widest">
-                Verification via non-exportable hardware key
-            </p>
+            <div class="mt-8 pt-8 border-t border-white/5 text-center">
+                <a href="{{ url_for('auth.verify_2fa') }}" class="text-[9px] font-tactical font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">
+                    Fallback to Sync_Fragment
+                </a>
+            </div>
         </div>
+
     </div>
+
 </div>
 
+<script src="{{ url_for('static', filename='webauthn.js') }}"></script>
 <script>
-    async function performHandshake() {
-        const btn = document.getElementById('sign-btn');
-        const status = document.getElementById('enclave-status');
-        const progress = document.getElementById('progress-bar');
+    async function verifySentinel() {
+        const btn = document.getElementById('verify-btn');
+        const terminal = document.getElementById('status-terminal');
         
         btn.disabled = true;
-        btn.classList.add('opacity-50');
-        status.innerText = "POLLING...";
-        progress.style.width = "40%";
+        terminal.innerText = "[SYS] HANDSHAKE_INITIATED...";
+        terminal.classList.add('text-solar');
 
         try {
-            // 1. Get Challenge from Server
-            const res = await fetch('/auth/verify-sentinel-challenge');
-            const { nonce } = await res.json();
-            
-            status.innerText = "SIGNING...";
-            progress.style.width = "70%";
-
-            // 2. Sign using Sentinel JS module
-            const signature = await Sentinel.signChallenge(nonce);
-            
-            if(!signature) throw new Error("Hardware signature refused.");
-
-            status.innerText = "VERIFYING...";
-            progress.style.width = "90%";
-
-            // 3. Submit to Server
-            const verifyRes = await fetch('/auth/verify-sentinel', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ signature })
-            });
-
-            const result = await verifyRes.json();
-            if(result.status === 'ok') {
-                status.innerText = "COMPLETE";
-                progress.style.width = "100%";
-                logToTerminal("[SENTINEL] Handshake Validated. Accessing Core...");
-                setTimeout(() => window.location.href = "{{ url_for('profile.dashboard') }}", 1000);
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (e) {
-            status.innerText = "ERROR";
-            status.classList.replace('text-cyan-400', 'text-rose-500');
-            progress.classList.replace('bg-cyan-500', 'bg-rose-500');
+            await handleBiometricLogin('passkey'); // Using new logic
+        } catch (err) {
+            console.error(err);
+            terminal.innerText = "[SYS] ERROR: HARDWARE_VECTOR_FAILED";
+            terminal.classList.replace('text-solar', 'text-red-500');
             btn.disabled = false;
-            btn.classList.remove('opacity-50');
-            logToTerminal(`[SENTINEL] CRITICAL: ${e.message}`);
         }
     }
 </script>

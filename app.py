@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, url_for, flash
+from flask import Flask, redirect, url_for, flash, render_template
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
@@ -8,6 +8,7 @@ from models import db, User
 import auth_routes
 import admin_routes
 import profile_routes
+import webauthn_routes
 
 load_dotenv()
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -19,6 +20,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 CSRFProtect(app)
+
+# GLOBAL INTRUSION PREVENTION SYSTEM (IPS) HOOK
+import utils
+@app.before_request
+def ips_intercept():
+    return utils.global_ips_hook()
+
+@app.errorhandler(403)
+def forbidden(e):
+    # Flask error handlers receive the HTTPException object
+    return render_template('403.html', error=e.description), 403
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -32,6 +44,7 @@ def load_user(user_id):
 app.register_blueprint(auth_routes.auth_bp)
 app.register_blueprint(admin_routes.admin_bp, url_prefix='/admin')
 app.register_blueprint(profile_routes.profile_bp, url_prefix='/profile')
+app.register_blueprint(webauthn_routes.webauthn_bp)
 
 # Bind OAuth
 auth_routes.oauth.init_app(app)

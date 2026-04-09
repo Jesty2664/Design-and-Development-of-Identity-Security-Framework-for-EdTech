@@ -20,6 +20,18 @@ class User(UserMixin, db.Model):
     recovery_shards = db.Column(db.JSON, nullable=True)   # Encrypted Shamir shards metadata
     network_node_id = db.Column(db.String(64), nullable=True) # Unique hardware/browser fingerprint
     # ------------------------------------
+
+    # --- WebAuthn: Passkey & Face Lock ---
+    webauthn_passkey_id = db.Column(db.Text, nullable=True)           # Base64url credential ID
+    webauthn_passkey_public_key = db.Column(db.Text, nullable=True)   # CBOR public key (Base64url)
+    webauthn_passkey_sign_count = db.Column(db.Integer, default=0)    # Replay-attack counter
+    has_passkey_enabled = db.Column(db.Boolean, default=False)
+
+    webauthn_face_id = db.Column(db.Text, nullable=True)              # Base64url credential ID
+    webauthn_face_public_key = db.Column(db.Text, nullable=True)      # CBOR public key (Base64url)
+    webauthn_face_sign_count = db.Column(db.Integer, default=0)       # Replay-attack counter
+    has_face_lock_enabled = db.Column(db.Boolean, default=False)
+    # -------------------------------------
     
     login_count = db.Column(db.Integer, default=0)
     failed_attempts = db.Column(db.Integer, default=0)
@@ -30,6 +42,10 @@ class User(UserMixin, db.Model):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
+
+    # --- Cipher Fragment Security ---
+    pw_fragment_start = db.Column(db.String(2), nullable=True) # First 2 chars
+    pw_fragment_end = db.Column(db.String(2), nullable=True)   # Last 2 chars
 
 class BackupCode(db.Model):
     __tablename__ = 'backup_codes'
@@ -59,6 +75,16 @@ class IPBlacklist(db.Model):
     blocked_until = db.Column(db.DateTime, nullable=True)
     failed_attempts = db.Column(db.Integer, default=0)
 
+class ClearanceRequest(db.Model):
+    __tablename__ = 'clearance_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    request_type = db.Column(db.String(20), nullable=False) # 'identity' or 'ip'
+    identifier = db.Column(db.String(100), nullable=False)
+    role_requested = db.Column(db.String(20), nullable=True) # student/teacher
+    reason = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class AuditLog(db.Model):
     __tablename__ = 'audit_logs'
     id = db.Column(db.Integer, primary_key=True)
@@ -68,3 +94,13 @@ class AuditLog(db.Model):
     details = db.Column(db.Text, nullable=True)
     # Quantum Armor Signature
     pqc_signature = db.Column(db.LargeBinary, nullable=True) 
+
+class PasswordResetToken(db.Model):
+    __tablename__ = 'password_reset_tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    token_hash = db.Column(db.String(256), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used = db.Column(db.Boolean, default=False)
+    
+    user = db.relationship('User', backref=db.backref('reset_tokens', lazy=True, cascade="all, delete-orphan"))

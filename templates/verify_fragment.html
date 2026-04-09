@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-6 py-24 min-h-[80vh] flex flex-col justify-center">
+    
+    <div class="reveal-on-scroll text-center mb-12">
+        <h1 class="text-5xl font-academic font-bold text-white uppercase tracking-tighter mb-2">CIPHER_HANDSHAKE</h1>
+        <p class="text-[10px] font-tactical text-cyber-indigo uppercase tracking-[0.4em]">Validation_Stage_02</p>
+    </div>
+
+    <!-- Handshake Enclave -->
+    <div class="cyber-glass p-10 edge-lit reveal-on-scroll">
+        <p class="text-[11px] font-academic text-gray-400 mb-10 leading-relaxed text-center">
+            To authorize restoration for <span class="text-white font-bold">{{ user_email }}</span>, provide the structural fingerprints of your previous cipher.
+        </p>
+
+        <form action="{{ url_for('auth.verify_fragment') }}" method="POST" class="space-y-12">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="grid grid-cols-2 gap-12">
+                <!-- START FRAGMENTS -->
+                <div class="space-y-6">
+                    <label class="block text-[9px] font-tactical text-cyber-indigo uppercase tracking-[0.3em] text-center">Initial_Vector</label>
+                    <div class="flex justify-center gap-4">
+                        <input name="f1" type="text" maxlength="1" required 
+                            class="w-12 h-16 bg-black/40 border border-white/10 text-xl font-tactical text-center text-white focus:border-cyber-indigo focus:ring-1 focus:ring-cyber-indigo/30 transition-all uppercase rounded-lg">
+                        <input name="f2" type="text" maxlength="1" required 
+                            class="w-12 h-16 bg-black/40 border border-white/10 text-xl font-tactical text-center text-white focus:border-cyber-indigo focus:ring-1 focus:ring-cyber-indigo/30 transition-all uppercase rounded-lg">
+                    </div>
+                </div>
+
+                <!-- END FRAGMENTS -->
+                <div class="space-y-6">
+                    <label class="block text-[9px] font-tactical text-cyber-indigo uppercase tracking-[0.3em] text-center">Terminal_Vector</label>
+                    <div class="flex justify-center gap-4">
+                        <input name="f_last_1" type="text" maxlength="1" required 
+                            class="w-12 h-16 bg-black/40 border border-white/10 text-xl font-tactical text-center text-white focus:border-cyber-indigo focus:ring-1 focus:ring-cyber-indigo/30 transition-all uppercase rounded-lg">
+                        <input name="f_last" type="text" maxlength="1" required 
+                            class="w-12 h-16 bg-black/40 border border-white/10 text-xl font-tactical text-center text-white focus:border-cyber-indigo focus:ring-1 focus:ring-cyber-indigo/30 transition-all uppercase rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- DUAL_FACTOR_SYNC -->
+            <div class="space-y-6 pt-6 border-t border-white/5">
+                <label class="block text-[9px] font-tactical text-cyber-indigo uppercase tracking-[0.3em] text-center">Secondary_Neural_Factor (MFA)</label>
+                <div class="max-w-xs mx-auto">
+                    <input name="totp_code" type="text" maxlength="6" required placeholder="000000" 
+                        class="magic-input text-center text-2xl tracking-[0.5em] focus:ring-1 focus:ring-cyber-indigo/50">
+                </div>
+            </div>
+
+            <div class="pt-6">
+                <button type="submit" class="w-full btn-magnetic py-4 text-xs tracking-[0.2em] font-bold uppercase transition-all">
+                    Authorize_Combined_Handshake
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 border-t border-white/5 pt-8 text-center">
+            <a href="{{ url_for('auth.forgot_password') }}" class="text-[9px] font-tactical text-gray-500 hover:text-cyber-indigo transition-colors uppercase tracking-widest">
+                Abort_Protocol
+            </a>
+        </div>
+    </div>
+
+    <p class="mt-8 text-[9px] font-tactical text-rose-500/60 uppercase tracking-[0.2em] text-center">
+        Warning: Unauthorized handshakes will trigger a 24-hour Node Quarantine.
+    </p>
+</div>
+
+<script>
+// Auto-focus next input field
+const inputs = document.querySelectorAll('.cyber-glass input[type="text"]');
+inputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+        if (e.target.value.length === 1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+            inputs[index - 1].focus();
+        }
+    });
+});
+</script>
+{% endblock %}

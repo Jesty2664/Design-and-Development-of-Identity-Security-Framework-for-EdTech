@@ -57,6 +57,9 @@ def change_password():
         
     if utils.check_hash(old, current_user.password_hash):
         current_user.password_hash = utils.hash_string(new)
+        # Update Fragments
+        current_user.pw_fragment_start = new[:2] if len(new) >= 2 else new
+        current_user.pw_fragment_end = new[-2:] if len(new) >= 2 else new
         db.session.commit()
         flash('Password successfully updated!', 'success')
     else:

@@ -1,172 +1,154 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="space-y-12">
+<div class="max-w-7xl mx-auto px-6 py-12 relative z-10">
+    
     <!-- Header -->
-    <div class="text-center md:text-left">
-        <h2 class="text-4xl font-black tracking-tighter uppercase italic text-gradient">Security Command Center</h2>
-        <p class="mt-2 text-xs font-mono text-gray-500 uppercase tracking-[0.3em]">Module ID: SEC_CMD_AETHER_v2</p>
+    <div class="mb-16 relative reveal-on-scroll">
+        <h1 class="text-6xl font-academic font-bold text-white uppercase tracking-tighter mb-4" style="text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);">
+            HARDENING_VAULT
+        </h1>
+        <div class="flex items-center gap-4">
+             <div class="h-[1px] w-24 bg-cyber-indigo/40"></div>
+             <p class="text-xs font-academic text-gray-500 uppercase tracking-widest italic">Node Protection & Biometric Identity Synchronization</p>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid lg:grid-cols-3 gap-8">
         
-        <!-- Sentinel: Hardware Binding -->
-        <div class="glass-panel p-8 rounded-3xl border-cyan-500/20 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
-                <svg class="w-16 h-16 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-            </div>
+        <!-- LEFT: Primary Security Layers -->
+        <div class="lg:col-span-2 space-y-8">
             
-            <h3 class="text-xl font-bold tracking-tight text-cyan-400 mb-6 uppercase flex items-center gap-3">
-                <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
-                Sentinel Protocol
-            </h3>
+            <!-- Biometric Vault (The Nexus) -->
+            <div class="cyber-glass p-10 relative reveal-on-scroll edge-lit">
+                <h3 class="text-xl font-academic font-bold text-white mb-10 border-l-4 border-cyber-indigo pl-6 uppercase tracking-widest">
+                    Biometric_Sentinels // hardware_Binding
+                </h3>
 
-            {% if current_user.public_hardware_key %}
-                <div class="bg-black/30 border border-cyan-500/20 rounded-xl p-5 space-y-4">
-                    <p class="text-xs text-cyan-300/80 font-mono leading-relaxed">Hardware identity successfully bound to local TPM. Every future authentication requires an enclave handshake.</p>
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-mono text-gray-500">NODE_ID:</span>
-                        <span class="text-[10px] font-mono text-white bg-cyan-900/40 px-2 py-0.5 rounded">{{ current_user.network_node_id }}</span>
+                <p class="text-[11px] font-academic text-gray-400 mb-10 leading-relaxed uppercase tracking-wider max-w-2xl">
+                    Bind your professional identity to high-assurance hardware sensors. Once synchronized, these vectors bypass the traditional password query in a "Cyber-Glass" handshake.
+                </p>
+
+                <div class="grid md:grid-cols-1 gap-8 mb-12 max-w-md">
+                    <!-- Passkey Track -->
+                    <div class="cyber-glass p-8 bg-white/2 border-white/5 group hover:border-cyber-indigo/40 transition-all reveal-on-scroll">
+                        <div class="flex justify-between items-start mb-6">
+                            <h4 class="text-white font-academic font-bold text-lg group-hover:text-cyber-indigo transition-colors uppercase">Physical_Passkey</h4>
+                            {% if current_user.webauthn_passkey_id %}
+                                <span class="text-[9px] font-tactical font-bold text-cyber-indigo bg-cyber-indigo/10 px-2 py-1">SYNCHRONIZED</span>
+                            {% else %}
+                                <span class="text-[9px] font-tactical font-bold text-gray-600 bg-white/5 px-2 py-1">INACTIVE</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-[10px] text-gray-500 font-academic mb-10 leading-relaxed">External roaming authenticators (e.g., Yubikeys) or integrated security chips.</p>
+                        
+                        <button onclick="handleRegister('passkey')" 
+                            class="w-full btn-magnetic py-3 text-[10px] font-bold uppercase transition-all">
+                            Initialize_Handshake
+                        </button>
                     </div>
                 </div>
-            {% else %}
-                <p class="text-sm text-gray-400 mb-6 leading-relaxed">Bind this account to the physical hardware of this machine. Creates a non-exportable cryptographic key inside your secure enclave.</p>
-                <button onclick="Sentinel.linkHardware()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all">
-                    Link Physical Hardware
-                </button>
-            {% endif %}
-        </div>
 
-        <!-- Shamir: Social Recovery -->
-        <div class="glass-panel p-8 rounded-3xl border-purple-500/20 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
-                <svg class="w-16 h-16 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 11-4 0v-1a1 1 0 00-1-1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
-            </div>
-
-            <h3 class="text-xl font-bold tracking-tight text-purple-400 mb-6 uppercase flex items-center gap-3">
-                <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
-                Social Recovery Mesh
-            </h3>
-
-            {% if current_user.recovery_shards %}
-                <div class="bg-black/30 border border-purple-500/20 rounded-xl p-5 space-y-4">
-                    <p class="text-xs text-purple-300/80 font-mono leading-relaxed">Account parity established. 2-out-of-3 Shard Mesh active. Social recovery protocol is standing by for emergency link request.</p>
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-mono text-gray-500">MESH_STATUS:</span>
-                        <span class="text-[10px] font-mono text-white bg-purple-900/40 px-2 py-0.5 rounded">STABLE</span>
-                    </div>
-                </div>
-            {% else %}
-                <p class="text-sm text-gray-400 mb-6 leading-relaxed">Eliminate the single point of failure. Split your access key into decentralized fragments for trusted guardian recovery.</p>
-                <button id="setup-recovery-btn" onclick="initializeShamir()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all">
-                    Generate Recovery Shards
-                </button>
-            {% endif %}
-        </div>
-
-        <!-- Standard 2FA Threshold Module -->
-        <div class="glass-panel p-8 rounded-3xl border-white/10 lg:col-span-2">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-200 mb-1">Standard 2FA Protocol</h3>
-                    <p class="text-sm text-gray-500 font-mono">Status: {% if current_user.is_2fa_required %}[ENFORCED]{% else %}[OPTIONAL]{% endif %}</p>
-                </div>
-
-                <div class="flex items-center gap-6 bg-black/20 p-4 rounded-xl border border-white/5">
-                    <div class="text-center px-4">
-                        <div class="text-2xl font-black font-mono text-indigo-400 slot-machine">{{ current_user.login_count }}</div>
-                        <div class="text-[10px] font-mono text-gray-600 uppercase tracking-widest mt-1">SESSIONS</div>
-                    </div>
-                    <div class="w-px h-10 bg-white/10"></div>
-                    <div class="text-center px-4">
-                        <div class="text-2xl font-black font-mono {{ 'text-emerald-500' if current_user.login_count >= 5 else 'text-rose-500' }}">{{ 5 if current_user.login_count >= 5 else 5 - current_user.login_count }}</div>
-                        <div class="text-[10px] font-mono text-gray-600 uppercase tracking-widest mt-1">THRESHOLD</div>
+                <!-- Handshake Logs -->
+                <div class="mt-8 border-t border-white/5 pt-8">
+                    <h5 class="text-[9px] font-tactical font-bold text-gray-600 uppercase mb-4 tracking-widest">Protocol_Handshake_Monitor</h5>
+                    <div id="webauthn-log" class="frost-log h-32 ghost-scroll bg-black/40 border border-white/5 p-4 font-mono text-[9px]">
+                        >> Awaiting command...
                     </div>
                 </div>
             </div>
 
-            <div class="mt-8 border-t border-white/5 pt-8">
-                {% if current_user.is_2fa_required %}
-                    {% if current_user.login_count >= 5 %}
+            <!-- Password Hardening -->
+            <div class="cyber-glass p-10 reveal-on-scroll">
+                <h3 class="text-lg font-academic font-bold text-white mb-8 uppercase tracking-widest flex items-center gap-4">
+                    <div class="w-1 h-6 bg-cyber-indigo/40"></div>
+                    Cipher_Rotation
+                </h3>
+                
+                <form action="{{ url_for('profile.change_password') }}" method="POST" class="space-y-6 max-w-md">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="relative">
+                        <input name="old_password" id="old_password" type="password" required placeholder="CURRENT_CIPHER" class="magic-input pr-12">
+                        <button type="button" onclick="togglePassword('old_password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyber-indigo transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input name="new_password" id="new_password" type="password" required placeholder="NEW_SECURITY_KEY" class="magic-input pr-12">
+                        <button type="button" onclick="togglePassword('new_password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyber-indigo transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn-magnetic px-10 py-3 text-[10px] uppercase font-bold">Execute Rotation</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT: Secondary Layers (Perimeter East) -->
+        <div class="space-y-8">
+            <!-- 2FA Status -->
+            <div class="cyber-glass p-8 reveal-on-scroll">
+                <h3 class="text-[10px] font-academic font-bold text-cyber-indigo uppercase tracking-[0.3em] mb-10">2FA_Sentinel</h3>
+                
+                <div class="flex items-center justify-between mb-8 pb-8 border-b border-white/5">
+                    <div class="text-[10px] font-tactical text-gray-500">MANDATORY_2FA</div>
+                    <div class="flex items-center gap-2">
+                        <span class="live-badge w-2 h-2 rounded-full bg-green-500"></span>
+                        <div class="text-green-500 font-bold font-academic">[LOCKED]</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    {% if not current_user.totp_secret %}
+                        <a href="{{ url_for('auth.setup_2fa') }}" class="w-full block text-center btn-magnetic py-3 text-[10px] bg-cyber-indigo/10 uppercase">ENROLL_NOW</a>
+                    {% else %}
+                        <div class="bg-cyber-indigo/5 border border-cyber-indigo/20 p-4 text-[10px] font-academic text-cyber-indigo/80 leading-relaxed mb-6">
+                            2FA Synchronized via TOTP node. Recovery shards available via the Social-Vault protocol.
+                        </div>
                         <form action="{{ url_for('profile.disable_2fa') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="w-full py-3 bg-rose-600/20 text-rose-500 border border-rose-500/30 hover:bg-rose-500 hover:text-white transition-all font-bold text-xs uppercase tracking-widest rounded-lg">
-                                De-prioritize 2FA Protocol
+                            <button type="submit" class="w-full text-[9px] font-tactical text-gray-600 hover:text-red-400 uppercase tracking-widest transition-colors">
+                                DE-SYNCHRONIZE_2FA (Requires 5 Logins)
                             </button>
                         </form>
-                    {% else %}
-                        <div class="flex items-start gap-4 p-4 bg-rose-950/20 rounded-xl border border-rose-500/20">
-                            <svg class="w-5 h-5 text-rose-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            <p class="text-xs text-rose-300 font-medium leading-relaxed">
-                                CRITICAL: 2FA is currently hardware-locked. You must complete <span class="font-black text-white italic">{{ 5 - current_user.login_count }}</span> additional successful login handshakes before you can voluntarily lower this protection layer.
-                            </p>
-                        </div>
                     {% endif %}
-                {% else %}
-                    <form action="{{ url_for('profile.enable_2fa') }}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="w-full py-3 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white transition-all font-bold text-xs uppercase tracking-widest rounded-lg">
-                            Re-initialize 2FA Armor
-                        </button>
-                    </form>
-                {% endif %}
+                </div>
+            </div>
+
+            <!-- Emergency Recovery -->
+            <div class="cyber-glass p-8 border-white/5 reveal-on-scroll">
+                <h3 class="text-[10px] font-academic font-bold text-white uppercase tracking-[0.3em] mb-6">Enclave_Recovery</h3>
+                <p class="text-[10px] font-academic text-gray-500 leading-relaxed mb-8">If your main node is lost, use established recovery shards or pre-calculated codes to restore access.</p>
+                <div class="space-y-3">
+                    <button onclick="handleSocialRecovery()" class="w-full text-left py-2 border-b border-white/5 text-[10px] font-tactical text-white/60 hover:text-cyber-indigo transition-colors flex justify-between items-center group">
+                        <span>>> Social_Shard_Reconstruction</span>
+                        <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    </button>
+                    <a href="{{ url_for('profile.backup_codes_display') }}" class="w-full block text-left py-2 border-b border-white/5 text-[10px] font-tactical text-white/60 hover:text-cyber-indigo transition-colors flex justify-between items-center group">
+                        <span>>> View_Anaolg_Backup_Fragments</span>
+                        <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Trust Threshold -->
+            <div class="cyber-glass p-8 reveal-on-scroll relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-[1px] bg-cyber-indigo/20"></div>
+                <h4 class="text-[9px] font-tactical text-gray-600 uppercase mb-4 tracking-widest">Trust_Metrics</h4>
+                <div class="flex items-end gap-2">
+                    <span class="text-4xl font-academic font-bold text-white tracking-tighter">{{ current_user.login_count }}</span>
+                    <span class="text-[10px] font-tactical text-gray-500 uppercase mb-1">/ 05 Logins</span>
+                </div>
+                <!-- Cyber-Indigo Progress Bar -->
+                <div class="mt-4 w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                    <div class="bg-cyber-indigo h-full shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000" style="width: {{ [current_user.login_count / 5 * 100, 100]|min }}%"></div>
+                </div>
             </div>
         </div>
-
     </div>
+
 </div>
 
-<!-- Social Recovery Setup Modal (Conceptual Container) -->
-<div id="recovery-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] hidden items-center justify-center p-4">
-    <div class="glass-panel p-8 rounded-3xl max-w-xl w-full border border-purple-500/30">
-        <h3 class="text-2xl font-black italic tracking-tighter uppercase text-purple-400 mb-4">Shards Generated</h3>
-        <p class="text-sm text-gray-400 mb-6">Distribution required. Save these fragments precisely. Access cannot be restored without them.</p>
-        
-        <div class="space-y-4">
-            <div class="bg-black/40 p-4 rounded-xl border border-white/5">
-                <label class="text-[10px] font-mono text-gray-600 uppercase mb-2 block">Shard Alpha (System Auto-Vault)</label>
-                <div id="shard-local" class="text-[10px] font-mono text-purple-300 break-all bg-purple-900/10 p-2 rounded">Generating...</div>
-            </div>
-            <div class="bg-black/40 p-4 rounded-xl border border-white/5">
-                <label class="text-[10px] font-mono text-gray-600 uppercase mb-2 block">Shard Beta (Guardian - COPY THIS)</label>
-                <div id="shard-guardian" class="text-[10px] font-mono text-purple-300 break-all bg-purple-900/10 p-2 rounded">Generating...</div>
-            </div>
-        </div>
-
-        <button onclick="window.location.reload()" class="w-full mt-8 py-3 bg-purple-600 text-white font-bold text-xs uppercase tracking-widest rounded-lg">
-            I Have Secured the Shards
-        </button>
-    </div>
-</div>
-
-<script>
-    async function initializeShamir() {
-        const btn = document.getElementById('setup-recovery-btn');
-        btn.disabled = true;
-        logToTerminal("[RECOVERY] Generating Cryptographic Shards...");
-
-        try {
-            const response = await fetch('/profile/setup-recovery', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}
-            });
-            const data = await response.json();
-            
-            if(data.status === 'ok') {
-                logToTerminal("[RECOVERY] Shard Mesh Active. Displaying fragments...");
-                document.getElementById('recovery-modal').classList.replace('hidden', 'flex');
-                document.getElementById('shard-local').innerText = JSON.stringify(data.shards.local);
-                document.getElementById('shard-guardian').innerText = JSON.stringify(data.shards.guardian);
-                
-                // Save locally too for demo purposes
-                localStorage.setItem('aether_shard_alpha', JSON.stringify(data.shards.local));
-            } else {
-                throw new Error(data.message);
-            }
-        } catch (e) {
-            logToTerminal(`[RECOVERY] ERROR: ${e.message}`);
-            btn.disabled = false;
-        }
-    }
-</script>
+<!-- Implementation for Handshake -->
+<script src="{{ url_for('static', filename='webauthn.js') }}"></script>
 {% endblock %}

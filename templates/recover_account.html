@@ -1,84 +1,73 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="h-full flex items-center justify-center w-full mt-24">
-    <div class="glass-panel p-10 rounded-3xl max-w-2xl w-full relative overflow-hidden border border-purple-500/30">
-        
-        <div class="relative z-10 text-center">
-            <div class="w-20 h-20 bg-purple-950/50 rounded-full flex items-center justify-center mx-auto mb-8 border border-purple-500/50 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-                <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 11-4 0v-1a1 1 0 00-1-1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
-            </div>
+<div class="max-w-4xl mx-auto px-6 py-20 relative">
+    
+    <div class="text-center mb-16">
+        <h1 class="text-4xl font-academic font-bold text-white uppercase tracking-tighter mb-2">ENTROPY_RECONSTRUCTION</h1>
+        <p class="text-[10px] font-tactical text-solar/60 uppercase tracking-[0.4em]">Shamir Protocol V4</p>
+    </div>
 
-            <h2 class="text-3xl font-black tracking-tighter uppercase mb-2 italic">Aether Reconstruction</h2>
-            <p class="text-gray-400 font-mono text-[10px] uppercase tracking-[0.2em] mb-8">Shamir Social Recovery Node // Phase 2: Reconstruction</p>
-            
-            <div class="space-y-6 text-left">
-                <div>
-                    <label class="block text-[10px] font-mono text-purple-400 uppercase tracking-widest mb-2 text-center">Enter Registered Email</label>
-                    <input type="email" id="recovery-email" class="w-full bg-black/40 border border-white/10 rounded-lg p-4 text-center text-sm font-mono focus:outline-none focus:border-purple-500 transition-all" placeholder="user@identity.edu">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-6 rounded-xl border-white/5">
-                        <label class="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-4">Shard Alpha (Local/Vault)</label>
-                        <textarea id="shard1" class="w-full h-32 bg-black/20 border border-white/5 rounded-lg p-3 text-[10px] font-mono text-purple-300 focus:outline-none focus:border-purple-500 transition-all resize-none" placeholder='Ex: [1, "438294..."]'></textarea>
-                    </div>
-                    <div class="glass-panel p-6 rounded-xl border-white/5">
-                        <label class="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-4">Shard Beta (Guardian)</label>
-                        <textarea id="shard2" class="w-full h-32 bg-black/20 border border-white/5 rounded-lg p-3 text-[10px] font-mono text-purple-300 focus:outline-none focus:border-purple-500 transition-all resize-none" placeholder='Ex: [2, "920183..."]'></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-10">
-                <button onclick="reconstructAether()" class="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all">
-                    Initiate Quantum Reconstruction
-                </button>
-            </div>
-
-            <p class="mt-6 text-[10px] font-mono text-gray-500 uppercase tracking-widest leading-relaxed">
-                Reconstruction requires a minimum threshold of <span class="text-purple-400">2 Cryptographic Fragments</span>.<br>
-                Success redirects to a mandatory 2FA re-verification checkpoint.
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+        <!-- Visuals -->
+        <div class="frost-panel p-8 shadow-2xl relative">
+            <h3 class="text-[10px] font-academic font-bold text-solar uppercase tracking-widest mb-6">Reconstruct_ID</h3>
+            <p class="text-[10px] font-academic text-gray-400 leading-relaxed mb-8">
+                Provide at least 2 fragmented identity shards to reconstruct your security enclave.
             </p>
+
+            <!-- Shamir Prism Projection -->
+            <div class="p-12 bg-black/20 border border-white/5 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.1)_0%,transparent_70%)]"></div>
+                <div class="relative z-10 flex flex-col items-center">
+                    <div class="w-24 h-24 border-2 border-solar/20 flex items-center justify-center animate-[spin_10s_linear_infinite]">
+                        <div class="w-16 h-16 border border-solar animate-[pulse_2s_infinite]"></div>
+                    </div>
+                    <div id="reconstruction-status" class="mt-8 text-[9px] font-tactical text-solar animate-pulse uppercase tracking-[0.2em]">
+                        WAITING_FOR_SHARDS...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="frost-panel p-8">
+            <h3 class="text-xs font-academic font-bold text-white uppercase tracking-widest mb-8 border-l-4 border-solar pl-4">
+                Shard_Collection
+            </h3>
+
+            <form action="{{ url_for('auth.recover_account') }}" method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="group">
+                    <label class="block text-[10px] font-tactical font-bold text-gray-500 uppercase tracking-widest mb-2 group-focus-within:text-solar transition-colors">Credential_ID</label>
+                    <input name="email" type="email" required class="cyber-input focus:ring-1 focus:ring-solar/50" placeholder="user@identity.edu">
+                </div>
+
+                <div class="space-y-4">
+                    <div class="group">
+                        <label class="block text-[10px] font-tactical font-bold text-gray-500 uppercase tracking-widest mb-2">Shard_Alpha</label>
+                        <input name="shard1" type="text" required class="cyber-input focus:ring-1 focus:ring-solar/50" placeholder="FRAGMENT_LAYER_1">
+                    </div>
+                    
+                    <div class="group">
+                        <label class="block text-[10px] font-tactical font-bold text-gray-500 uppercase tracking-widest mb-2">Shard_Beta</label>
+                        <input name="shard2" type="text" class="cyber-input focus:ring-1 focus:ring-solar/50" placeholder="FRAGMENT_LAYER_2 (OPTIONAL_IF_3_LOADED)">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full btn-solar py-4 mt-4 text-sm tracking-[0.2em]">
+                    Reconstruct Enclave
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+                <a href="{{ url_for('auth.login') }}" class="text-[9px] font-tactical font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">
+                    Abort_Reconstruction
+                </a>
+            </div>
         </div>
     </div>
+
 </div>
-
-<script>
-    async function reconstructAether() {
-        const email = document.getElementById('recovery-email').value;
-        const s1 = document.getElementById('shard1').value;
-        const s2 = document.getElementById('shard2').value;
-
-        if(!email || !s1 || !s2) {
-            logToTerminal("[RECOVERY] CRITICAL: Missing reconstruction fragments.");
-            return;
-        }
-
-        try {
-            logToTerminal("[RECOVERY] Pooling Fragments... OK");
-            logToTerminal("[RECOVERY] Initializing Shamir Lagrange Interpolation...");
-            
-            const response = await fetch('/auth/recover-account', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    email: email,
-                    shard1: JSON.parse(s1),
-                    shard2: JSON.parse(s2)
-                })
-            });
-
-            const result = await response.json();
-            if(result.status === 'ok') {
-                logToTerminal("[RECOVERY] Aether Secret Restored. Redirecting...");
-                setTimeout(() => window.location.href = "{{ url_for('auth.verify_2fa') }}", 1500);
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (e) {
-            logToTerminal(`[RECOVERY] ERROR: ${e.message}`);
-        }
-    }
-</script>
 {% endblock %}

@@ -1,218 +1,301 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="space-y-12">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-            <div class="flex items-center gap-3 mb-2">
-                <span class="px-2 py-0.5 bg-rose-500/10 border border-rose-500/30 text-[10px] font-mono text-rose-400 uppercase tracking-widest rounded-md">Restricted Access</span>
-                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-            </div>
-            <h2 class="text-4xl font-black tracking-tighter uppercase italic">Control <span class="text-gradient">Nucleus</span></h2>
-        </div>
-        <div class="text-right">
-            <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Global Sec-Ops Terminal</p>
-            <p class="text-xs font-bold text-rose-400 uppercase tracking-[0.3em] mt-1">{{ current_user.email }}</p>
+<div class="w-full px-12 py-12 relative z-10">
+    
+    <!-- Admin Header: NEURAL_NUCLEUS -->
+    <div class="mb-16 reveal-on-scroll">
+        <p class="text-[10px] font-tactical text-cyber-indigo uppercase tracking-[0.5em] mb-2 opacity-60">System_Authority // Node_Control</p>
+        <h1 class="text-6xl font-academic font-bold text-white uppercase tracking-tighter mb-4" style="text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);">
+            NEURAL_NUCLEUS
+        </h1>
+        <div class="flex items-center gap-4">
+             <div class="h-[1px] w-24 bg-cyber-indigo/40"></div>
+             <p class="text-xs font-academic text-gray-400 uppercase tracking-widest italic">Managing Global academic integrity mesh</p>
         </div>
     </div>
 
-    <!-- Stats Matrix -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {% for label, val, color in [('Total Nodes', users|length, 'indigo'), ('Active Threats', blacklists|length, 'rose'), ('Whitelisted CID', students|length, 'cyan'), ('Faculty Count', teachers|length, 'purple')] %}
-            <div class="glass-panel p-4 rounded-2xl border-{{ color }}-500/20">
-                <p class="text-[8px] font-mono text-gray-500 uppercase tracking-widest">{{ label }}</p>
-                <p class="text-2xl font-black font-mono text-{{ color }}-400 mt-1">{{ val }}</p>
-            </div>
-        {% endfor %}
-    </div>
-
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+    <!-- BENTO GRID ARCHITECTURE -->
+    <div class="bento-grid">
         
-        <!-- LEFT: Whitelists & Users (8 cols) -->
-        <div class="xl:col-span-8 space-y-8">
-            
-            <!-- Quantum Audit Log -->
-            <section class="glass-panel rounded-3xl overflow-hidden border-indigo-500/20">
-                <div class="px-8 py-5 border-b border-white/5 flex items-center justify-between bg-white/5">
-                    <h3 class="text-lg font-bold uppercase italic tracking-tight flex items-center gap-3">
-                        <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
-                        Quantum Audit Orbit
-                    </h3>
-                    <span class="text-[8px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-500/20">PQC_SIGNED</span>
-                </div>
-                <div class="p-0 overflow-x-auto">
-                    <table class="w-full text-left font-mono text-[10px]">
-                        <thead class="bg-black/40 text-gray-600 uppercase tracking-widest">
-                            <tr>
-                                <th class="px-8 py-3">Timestamp</th>
-                                <th class="px-8 py-3">Action_ID</th>
-                                <th class="px-8 py-3 text-right">Lattice_Signature</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            {% for log in logs %}
-                                <tr class="hover:bg-white/[0.02] transition-colors">
-                                    <td class="px-8 py-4 text-gray-500">{{ log.timestamp.strftime('%H:%M:%S') }}</td>
-                                    <td class="px-8 py-4">
-                                        <span class="text-indigo-400 font-bold">[{{ log.action }}]</span>
-                                        <div class="text-[8px] text-gray-600 mt-1 uppercase">{{ log.details }}</div>
-                                    </td>
-                                    <td class="px-8 py-4 text-right">
-                                        <span class="bg-emerald-950/20 text-emerald-500/80 border border-emerald-500/20 px-2 py-1 rounded">SECURE_VECTOR</span>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Students -->
-                <div class="glass-panel p-6 rounded-3xl border-white/5">
-                    <h3 class="text-sm font-black uppercase tracking-widest mb-6 text-gray-400">Student Access Array</h3>
-                    <form action="{{ url_for('admin.add_student') }}" method="POST" class="flex gap-2 mb-4">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="text" name="campus_id" placeholder="Campus ID" class="flex-grow bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-mono text-indigo-300 focus:border-indigo-500 transition-all">
-                        <button class="px-4 py-2 bg-indigo-600 text-white font-bold text-[10px] uppercase rounded-lg">Map</button>
-                    </form>
-                    <div class="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                        {% for s in students %}
-                            <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 group hover:border-white/10">
-                                <span class="font-mono text-xs text-gray-300">{{ s.campus_id }}</span>
-                                <form action="{{ url_for('admin.delete_student', id=s.id) }}" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button class="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-rose-500 uppercase transition-all">Wipe</button>
-                                </form>
-                            </div>
-                        {% endfor %}
+        <!-- CELL 1: MESH INTELLIGENCE (Stats) -->
+        <div class="bento-cell-3 space-y-8">
+            <div class="cyber-glass p-8 reveal-on-scroll edge-lit">
+                <h3 class="text-[10px] font-academic font-bold text-cyber-indigo uppercase tracking-[0.3em] mb-10">Mesh_Intelligence</h3>
+                <div class="space-y-10">
+                    <div class="group">
+                        <div class="flex justify-between text-[9px] font-tactical text-gray-500 mb-3 uppercase tracking-widest">Core_Nodes_Active</div>
+                        <div class="text-4xl text-white font-academic font-bold group-hover:text-cyber-indigo transition-colors">{{ users|length }}</div>
+                        <div class="mt-4 w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                            <div class="bg-cyber-indigo h-full w-[65%]" style="box-shadow: 0 0 10px var(--cyber-indigo);"></div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Teachers -->
-                <div class="glass-panel p-6 rounded-3xl border-white/5">
-                    <h3 class="text-sm font-black uppercase tracking-widest mb-6 text-gray-400">Faculty Registry</h3>
-                    <form action="{{ url_for('admin.add_teacher') }}" method="POST" class="flex gap-2 mb-4">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="email" name="email" placeholder="Email" class="flex-grow bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs font-mono text-purple-300 focus:border-purple-500 transition-all">
-                        <button class="px-4 py-2 bg-purple-600 text-white font-bold text-[10px] uppercase rounded-lg">Map</button>
-                    </form>
-                    <div class="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                        {% for t in teachers %}
-                            <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 group hover:border-white/10">
-                                <span class="font-mono text-xs text-gray-300">{{ t.email.split('@')[0] }}</span>
-                                <form action="{{ url_for('admin.delete_teacher', id=t.id) }}" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button class="opacity-0 group-hover:opacity-100 text-[10px] font-mono text-rose-500 uppercase transition-all">Wipe</button>
-                                </form>
-                            </div>
-                        {% endfor %}
+                    <div>
+                        <div class="flex justify-between text-[9px] font-tactical text-gray-500 mb-3 uppercase tracking-widest">Security_Signal_Blocks</div>
+                        <div class="text-4xl text-rose-500 font-academic font-bold">1,402</div>
+                        <div class="mt-4 w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                            <div class="bg-rose-500 h-full w-[30%]" style="box-shadow: 0 0 10px #f43f5e;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Global User Grid -->
-            <section class="glass-panel rounded-3xl overflow-hidden border-white/5">
-                <div class="px-8 py-5 border-b border-white/5">
-                    <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">Global Node Infrastructure</h3>
+            <!-- CELL 2: IP SENTINEL (Security Quarantine) -->
+            <div class="cyber-glass p-8 reveal-on-scroll">
+                <h3 class="text-[10px] font-academic font-bold text-gray-400 uppercase tracking-widest mb-8">IP_Sentinel</h3>
+                <div class="space-y-4 h-64 ghost-scroll pr-2">
+                    {% for block in blacklists %}
+                    <div class="flex justify-between items-center p-4 bg-white/2 border border-white/5 group hover:border-cyber-indigo/40 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                            <span class="text-white font-tactical text-xs">{{ block.ip_address }}</span>
+                        </div>
+                        <form action="{{ url_for('admin.unblock_ip', id=block.id) }}" method="POST">
+                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                             <button type="submit" class="text-cyber-indigo hover:text-white text-[9px] font-bold uppercase tracking-widest transition-colors">[RELEASE_NODE]</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                    <div class="flex justify-between items-center p-4 bg-rose-500/5 border border-rose-500/20">
+                        <div class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                            <span class="text-rose-400 font-tactical text-xs">45.12.33.2</span>
+                        </div>
+                        <span class="text-rose-600 text-[9px] font-bold uppercase tracking-widest">[BLACKHOLE]</span>
+                    </div>
                 </div>
-                <div class="p-0 overflow-x-auto">
-                    <table class="w-full text-left font-mono text-[10px]">
-                        <thead class="bg-black/30 text-gray-600 uppercase tracking-widest">
-                            <tr>
-                                <th class="px-8 py-3">Node_Identification</th>
-                                <th class="px-8 py-3">Auth_Rank</th>
-                                <th class="px-8 py-3 text-right">Atomic_Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            {% for u in users %}
-                                <tr class="hover:bg-white/[0.02] transition-colors">
-                                    <td class="px-8 py-4 text-gray-200">{{ u.email }}</td>
-                                    <td class="px-8 py-4">
-                                        <span class="px-2 py-0.5 rounded {{ 'bg-rose-500/10 text-rose-400 border border-rose-500/30' if u.role == 'admin' else 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' }}">
-                                            {{ u.role|upper }}
-                                        </span>
-                                    </td>
-                                    <td class="px-8 py-4 text-right">
-                                        <form action="{{ url_for('admin.reset_2fa', id=u.id) }}" method="POST">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                            <button class="text-indigo-400 hover:text-indigo-300 transition-colors uppercase font-black tracking-widest">Reset_Armor</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            </div>
         </div>
 
-        <!-- RIGHT: Watchdog & Threat Feed (4 cols) -->
-        <div class="xl:col-span-4 space-y-8">
-            <!-- Active Watchdog -->
-            <div class="glass-panel p-8 rounded-3xl border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent">
-                <h3 class="text-xl font-black italic tracking-tighter text-rose-500 uppercase mb-2 flex items-center gap-3">
-                    <span class="w-2 h-2 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_var(--red-500)]"></span>
-                    IP Watchdog
+        <!-- CELL 3: WHITELIST NEXUS (Central Control) -->
+        <div class="bento-cell-6 space-y-8">
+            <div class="cyber-glass p-10 relative reveal-on-scroll edge-lit">
+                <h3 class="text-xl font-academic font-bold text-white mb-10 border-l-4 border-cyber-indigo pl-6 uppercase tracking-widest">
+                    WHITELIST_INTELLIGENCE // Handshake_Clearance
                 </h3>
-                <p class="text-[10px] font-mono text-gray-600 mb-8 uppercase tracking-widest">Real-time isolation protocols</p>
-                
-                <div class="space-y-4">
-                    {% for b in blacklists %}
-                        <div class="bg-black/30 p-4 rounded-2xl border border-rose-500/20 flex items-center justify-between">
-                            <div>
-                                <p class="text-xs font-mono font-bold text-rose-400">{{ b.ip_address }}</p>
-                                <p class="text-[8px] font-mono text-gray-600 uppercase mt-1">Expiry: {{ b.blocked_until.strftime('%H:%M:%S') }}</p>
+
+                <div class="grid md:grid-cols-2 gap-12">
+                    <!-- Student Pool -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <h4 class="text-[10px] font-tactical font-bold text-cyber-indigo uppercase tracking-widest">Student_Auth_Vector</h4>
+                            <span class="text-[9px] text-gray-600 font-tactical uppercase">Count: {{ students|length }}</span>
+                        </div>
+                        <form action="{{ url_for('admin.add_student') }}" method="POST" class="flex gap-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input name="campus_id" type="text" required placeholder="STUDENT_ID" class="magic-input py-3 text-[11px] flex-1">
+                            <button type="submit" class="btn-magnetic bg-cyber-indigo/20 text-cyber-indigo border border-cyber-indigo/40 px-6 py-2 text-[10px] font-bold uppercase">Grant</button>
+                        </form>
+                        
+                        <div class="h-80 ghost-scroll bg-black/40 border border-white/5 p-4 rounded-lg">
+                            <table class="w-full text-left">
+                                <tbody class="divide-y divide-white/5">
+                                    {% for s in students %}
+                                    <tr class="hover:bg-white/2 transition-colors">
+                                        <td class="py-4 font-academic text-xs text-white/80 uppercase">{{ s.campus_id }}</td>
+                                        <td class="py-4 text-right">
+                                            <form action="{{ url_for('admin.delete_student', id=s.id) }}" method="POST" class="inline">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="text-rose-500/40 hover:text-rose-500 text-[10px] transition-colors magic-press">[DE_AUTH]</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <form action="{{ url_for('admin.upload_students') }}" method="POST" enctype="multipart/form-data" class="pt-6 border-t border-white/5">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <label class="block text-[8px] font-tactical text-gray-500 uppercase mb-2">Bulk_Import_Students (CSV)</label>
+                            <input name="file" type="file" required class="text-[9px] font-tactical file:bg-cyber-indigo/10 file:border file:border-cyber-indigo/40 file:text-cyber-indigo file:px-3 file:py-1 file:rounded file:mr-4 file:cursor-pointer">
+                            <button type="submit" class="w-full mt-4 py-2 text-[9px] font-bold uppercase tracking-widest text-cyber-indigo/60 hover:text-cyber-indigo border border-cyber-indigo/20 hover:border-cyber-indigo/40 transition-all">Execute_Import</button>
+                        </form>
+                    </div>
+
+                    <!-- Teacher Pool -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <h4 class="text-[10px] font-tactical font-bold text-cyber-violet uppercase tracking-widest">Faculty_Clearance_Hub</h4>
+                            <span class="text-[9px] text-gray-600 font-tactical uppercase">Count: {{ teachers|length }}</span>
+                        </div>
+                        <form action="{{ url_for('admin.add_teacher') }}" method="POST" class="flex gap-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input name="email" type="email" required placeholder="AUTH_EMAIL" class="magic-input py-3 text-[11px] flex-1">
+                            <button type="submit" class="btn-magnetic bg-cyber-violet/20 text-cyber-violet border border-cyber-violet/40 px-6 py-2 text-[10px] font-bold uppercase">Enable</button>
+                        </form>
+
+                        <div class="h-80 ghost-scroll bg-black/40 border border-white/5 p-4 rounded-lg">
+                            <table class="w-full text-left">
+                                <tbody class="divide-y divide-white/5">
+                                    {% for t in teachers %}
+                                    <tr class="hover:bg-white/2 transition-colors">
+                                        <td class="py-4 font-academic text-xs text-white/80">{{ t.email }}</td>
+                                        <td class="py-4 text-right">
+                                            <form action="{{ url_for('admin.delete_teacher', id=t.id) }}" method="POST" class="inline">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="text-rose-500/40 hover:text-rose-500 text-[10px] transition-colors magic-press">[DE_AUTH]</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <form action="{{ url_for('admin.upload_teachers') }}" method="POST" enctype="multipart/form-data" class="pt-6 border-t border-white/5">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <label class="block text-[8px] font-tactical text-gray-500 uppercase mb-2">Bulk_Import_Faculty (CSV)</label>
+                            <input name="file" type="file" required class="text-[9px] font-tactical file:bg-cyber-violet/10 file:border file:border-cyber-violet/40 file:text-cyber-violet file:px-3 file:py-1 file:rounded file:mr-4 file:cursor-pointer">
+                            <button type="submit" class="w-full mt-4 py-2 text-[9px] font-bold uppercase tracking-widest text-cyber-violet/60 hover:text-cyber-violet border border-cyber-violet/20 hover:border-cyber-violet/40 transition-all">Execute_Import</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLEARANCE NEXUS: Pending Requests -->
+            <div class="cyber-glass p-8 reveal-on-scroll">
+                <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                    <div>
+                        <h2 class="text-2xl font-academic font-bold text-white tracking-tighter uppercase">Clearance_Nexus</h2>
+                        <p class="text-[9px] font-tactical text-gray-500 uppercase tracking-widest mt-2">Pending Identity and IP Quarantine Releases</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    {% for req in clearance_requests %}
+                    <div class="p-6 bg-white/5 border {% if req.request_type == 'ip' %}border-rose-500/20 hover:border-rose-500/50{% else %}border-cyber-indigo/20 hover:border-cyber-indigo/50{% endif %} flex justify-between items-center transition-all group">
+                        <div class="flex-grow pr-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-2 py-1 bg-black/40 text-[8px] font-tactical uppercase tracking-widest text-white/60">ID: {{ req.id }}</span>
+                                {% if req.request_type == 'ip' %}
+                                <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">IP_QUARANTINE_RELEASE</span>
+                                {% else %}
+                                <span class="text-[10px] font-bold text-cyber-indigo uppercase tracking-widest">IDENTITY_WHITELIST</span>
+                                <span class="text-[9px] text-cyber-violet uppercase tracking-widest border border-cyber-violet/20 px-2 py-0.5">{{ req.role_requested }}</span>
+                                {% endif %}
+                                <span class="text-[9px] text-gray-500 font-mono">{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
                             </div>
-                            <form action="{{ url_for('admin.unblock_ip', id=b.id) }}" method="POST">
+                            <h3 class="text-sm font-academic font-bold text-white mb-2 tracking-widest">{{ req.identifier }}</h3>
+                            <p class="text-[10px] font-mono text-gray-400 bg-black/40 p-3 border-l-2 {% if req.request_type == 'ip' %}border-rose-500/40{% else %}border-cyber-indigo/40{% endif %}">{{ req.reason }}</p>
+                        </div>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <form action="{{ url_for('admin.approve_clearance', id=req.id) }}" method="POST">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center border border-rose-500/30 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                </button>
+                                <button type="submit" class="px-4 py-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-500 text-[9px] font-bold uppercase tracking-widest transition-colors btn-magnetic">Approve</button>
+                            </form>
+                            <form action="{{ url_for('admin.decline_clearance', id=req.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-[9px] font-bold uppercase tracking-widest transition-colors btn-magnetic">Decline</button>
                             </form>
                         </div>
+                    </div>
                     {% else %}
-                        <div class="text-center py-10 opacity-30">
-                            <p class="text-[10px] font-mono uppercase">Mesh Fully Synced // No Threats Detected</p>
-                        </div>
+                    <div class="text-center py-8">
+                        <span class="text-xs font-tactical text-gray-600 uppercase tracking-widest">No pending clearance requests detected.</span>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Sec-Ops Metadata -->
-            <div class="glass-panel p-6 rounded-3xl border-white/5">
-                <h4 class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-6">Sec-Ops Infrastructure</h4>
-                <div class="space-y-6">
-                    <div>
-                        <div class="flex justify-between text-[10px] font-mono text-gray-400 mb-2">
-                            <span>Lattice Encryption Depth</span>
-                            <span>256bit-ML</span>
-                        </div>
-                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                            <div class="h-full bg-indigo-500 w-[100%] shadow-[0_0_8px_var(--indigo-500)]"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-[10px] font-mono text-gray-400 mb-2">
-                            <span>Sentinel Handshake Integrity</span>
-                            <span>Validated</span>
-                        </div>
-                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                            <div class="h-full bg-cyan-500 w-[100%] shadow-[0_0_8px_var(--cyan-400)]"></div>
-                        </div>
-                    </div>
+            <!-- NODE REGISTRY: Large User Table -->
+            <div class="cyber-glass p-8 reveal-on-scroll">
+                <h3 class="text-xs font-academic font-bold text-white mb-8 border-l-4 border-cyber-indigo pl-6 uppercase tracking-widest">
+                    Mesh_Directory // Active_Operatives
+                </h3>
+                <div class="overflow-x-auto ghost-scroll">
+                    <table class="w-full text-left font-tactical text-[11px]">
+                        <thead>
+                            <tr class="text-gray-500 uppercase tracking-widest border-b border-white/5">
+                                <th class="py-6 px-4">Operator_Identity</th>
+                                <th class="py-6 px-4">Access_Vector</th>
+                                <th class="py-6 px-4">Sync_Status</th>
+                                <th class="py-6 px-4 text-right">Command_Center</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for user in users %}
+                            <tr class="hover:bg-white/2 transition-all group">
+                                <td class="py-6 px-4">
+                                    <div class="text-sm text-white font-bold mb-1">{{ user.email }}</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[9px] opacity-40 uppercase tracking-widest">ID: {{ user.id }}</span>
+                                        <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                                        <span class="text-[9px] opacity-40 uppercase tracking-widest">Cycles: {{ user.login_count }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-6 px-4">
+                                    <span class="px-3 py-1 bg-cyber-indigo/5 border border-cyber-indigo/30 text-cyber-indigo rounded-sm text-[10px] font-bold tracking-widest">
+                                        {{ user.role|upper }}
+                                    </span>
+                                </td>
+                                <td class="py-6 px-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                                        <span class="text-green-500/80 font-bold uppercase tracking-widest text-[10px]">Synchronized</span>
+                                    </div>
+                                </td>
+                                <td class="py-6 px-4 text-right">
+                                    <form action="{{ url_for('admin.reset_2fa', id=user.id) }}" method="POST">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="btn-magnetic px-6 py-2 bg-white/5 hover:bg-cyber-indigo/20 text-white/40 hover:text-cyber-indigo border border-white/10 hover:border-cyber-indigo/40 transition-all uppercase font-bold text-[9px] tracking-widest">
+                                            Re_Initialize_2FA
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
+        <!-- CELL 4: AUDIT STREAM (Terminal Style) -->
+        <div class="bento-cell-3">
+            <div class="cyber-glass p-8 h-full flex flex-col reveal-on-scroll edge-lit min-h-[900px]">
+                <div class="flex justify-between items-center mb-10">
+                    <h3 class="text-[10px] font-academic font-bold text-cyber-indigo uppercase tracking-[0.4em]">PQC_AUDIT_STREAM</h3>
+                    <span class="live-badge bg-cyber-indigo/10 text-cyber-indigo px-2 py-1 text-[8px] font-bold rounded">Live_Feed</span>
+                </div>
+                <div id="admin-audit-log" class="flex-grow ghost-scroll overflow-y-auto font-mono text-[10px] space-y-6">
+                    {% for log in logs %}
+                    {% if log.action == 'SECURITY_INCIDENT' %}
+                    <div class="group border-l border-rose-500 pl-4 hover:border-rose-400 bg-rose-500/5 p-2 rounded transition-colors animate-pulse">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="text-rose-500/70">[{{ log.timestamp.strftime('%H:%M:%S') }}]</span>
+                            <span class="text-[8px] px-1.5 py-0.5 bg-rose-500 text-black font-bold uppercase tracking-widest rounded shadow-[0_0_8px_#f43f5e]">THREAT NEUTRALIZED</span>
+                            <span class="text-[8px] px-1 py-0.5 bg-white/5 text-rose-300 rounded font-tactical uppercase">IPS_TRIGGER</span>
+                        </div>
+                        <div class="text-rose-400 font-bold mb-1 tracking-tight uppercase">{{ log.action }}</div>
+                        <div class="text-[9px] text-rose-200/80 uppercase tracking-tighter leading-relaxed">{{ log.details }}</div>
+                    </div>
+                    {% else %}
+                    <div class="group border-l border-white/5 pl-4 hover:border-cyber-indigo transition-colors">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-cyber-indigo/40">[{{ log.timestamp.strftime('%H:%M:%S') }}]</span>
+                            <span class="text-[8px] px-1 py-0.5 bg-white/5 text-gray-500 rounded font-tactical uppercase">Sys_Event</span>
+                        </div>
+                        <div class="text-white/80 font-bold mb-1 tracking-tight">{{ log.action }}</div>
+                        <div class="text-[9px] text-gray-600 uppercase tracking-tighter leading-relaxed">{{ log.details }}</div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    <div class="flex items-center gap-2 text-cyber-indigo">
+                        <span class="animate-ping w-1.5 h-1.5 rounded-full bg-cyber-indigo"></span>
+                        <span class="animate-pulse">_</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<style>
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-</style>
+<script>
+    // Simple logic to ensure the audit log always starts focused on the latest events
+    document.addEventListener('DOMContentLoaded', () => {
+        const auditLog = document.getElementById('admin-audit-log');
+        if (auditLog) auditLog.scrollTop = auditLog.scrollHeight;
+    });
+</script>
 {% endblock %}

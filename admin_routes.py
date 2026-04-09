@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from models import db, User, AllowedStudentId, AllowedTeacherEmail, IPBlacklist, AuditLog
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils import lattice_crypto
 import functools
 
@@ -25,10 +25,23 @@ def dashboard():
     teachers = AllowedTeacherEmail.query.all()
     logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(15).all()
     
-    return render_template('admin_dashboard.html', 
-                           users=users, blacklists=blacklists, 
-                           students=students, teachers=teachers,
-                           logs=logs)
+    twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+    recent_logs = [l for l in logs if l.timestamp >= twenty_four_hours_ago]
+    threat_count = sum(1 for l in recent_logs if l.action == "SECURITY_INCIDENT")
+
+    # Fetch Clearance Requests
+    from models import ClearanceRequest
+    clearance_reqs = ClearanceRequest.query.filter_by(status='pending').order_by(ClearanceRequest.created_at.desc()).all()
+
+    return render_template(
+        'admin_dashboard.html', 
+        users=users, 
+        students=students, 
+        teachers=teachers, 
+        logs=logs,
+        threat_count=threat_count,
+        clearance_requests=clearance_reqs
+    )
 
 @admin_bp.route('/whitelist/student', methods=['POST'])
 @login_required
@@ -157,4 +170,55 @@ def reset_2fa(id):
         db.session.commit()
         
         flash(f'2FA Reset for {user.email}. They will be prompted to re-enroll.', 'info')
+    return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/clearance/approve/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def approve_clearance(id):
+    from models import ClearanceRequest, AllowedStudentId, AllowedTeacherEmail, IPBlacklist, AuditLog, db
+    req = ClearanceRequest.query.get_or_404(id)
+    
+    if req.status != 'pending':
+        flash('Request already processed.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+        
+    req.status = 'approved'
+    log_detail = f"Approved clearance for {req.identifier}"
+    
+    if req.request_type == 'identity':
+        if req.role_requested == 'student':
+            if not AllowedStudentId.query.filter_by(campus_id=req.identifier).first():
+                db.session.add(AllowedStudentId(campus_id=req.identifier))
+        elif req.role_requested == 'teacher':
+            if not AllowedTeacherEmail.query.filter_by(email=req.identifier).first():
+                db.session.add(AllowedTeacherEmail(email=req.identifier))
+    elif req.request_type == 'ip':
+        ip_rec = IPBlacklist.query.filter_by(ip_address=req.identifier).first()
+        if ip_rec:
+            # Drop them from blacklist
+            db.session.delete(ip_rec)
+            
+    db.session.add(AuditLog(action="CLEARANCE_APPROVED", details=log_detail))
+    db.session.commit()
+    
+    flash(f"Approved {req.request_type} clearance for {req.identifier}", "success")
+    return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/clearance/decline/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def decline_clearance(id):
+    from models import ClearanceRequest, AuditLog, db
+    req = ClearanceRequest.query.get_or_404(id)
+    
+    if req.status != 'pending':
+        flash('Request already processed.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+        
+    req.status = 'declined'
+    db.session.add(AuditLog(action="CLEARANCE_DECLINED", details=f"Declined clearance for {req.identifier}"))
+    db.session.commit()
+    
+    flash(f"Declined clearance for {req.identifier}", "info")
     return redirect(url_for('admin.dashboard'))
